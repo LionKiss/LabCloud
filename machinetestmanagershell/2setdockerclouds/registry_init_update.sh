@@ -2,40 +2,40 @@
 
 function connect(){
   #connect internet
-  curl "http://202.193.80.124/" -H "Pragma: no-cache" -H "Origin: http://202.193.80.124" -H "Accept-Encoding: gzip, deflate" -H "Accept-Language: zh-CN,zh;q=0.8" -H "Upgrade-Insecure-Requests: 1" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" -H "Cache-Control: max-age=0" -H "Referer: http://202.193.80.124/" -H "Connection: keep-alive" --data "DDDDD=g102016452&upass=03141b2b5032ba8c682103364b93ce2a123456781&R1=0&R2=1&para=00&0MKKey=123456" --compressed | grep "Please don't forget to log out after you have finished."
 }
 function disconnect(){
   #disconnect internet
-  curl "http://202.193.80.124/F.htm" -H "Accept-Encoding: gzip, deflate, sdch" -H "Accept-Language: zh-CN,zh;q=0.8" -H "Upgrade-Insecure-Requests: 1" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" -H "Referer: http://202.193.80.124/" -H "Connection: keep-alive" --compressed >/dev/null 2>&1
 }
 function registry_init_update(){
     connect
-	#²¿Êğkubernetes-dashboard.yaml£ºÒ»¸öÈİÆ÷ÀïÃæµÄÊÇÒ»¸öÍøÕ¾£¬ÓÃÀ´ÏÔÊ¾¼¯Èº²¿Êğ»·¾³£¬Ò²ÊÇÊ¹ÓÃµÄ¼¯ÈºµÄui½Ó¿Ú
-	#http://172.16.2.14:5000/v2/_catalog ÏÔÊ¾µÄ×Ô¼ºË½ÓĞ¾µÏñ¿âµÄÁĞ±í£¬¼´ÅäÖÃµÄregistry½ÚµãµØÖ·
-	#Áù¸ö¾µÏñÏÂÔØµØÖ·
+    #è§£å†³é”™è¯¯ï¼šopen /etc/docker/certs.d/registry.access.redhat.com/redhat-ca.crt: no such file or directory
+    yum install -y *rhsm*
+	#éƒ¨ç½²kubernetes-dashboard.yamlï¼šä¸€ä¸ªå®¹å™¨é‡Œé¢çš„æ˜¯ä¸€ä¸ªç½‘ç«™ï¼Œç”¨æ¥æ˜¾ç¤ºé›†ç¾¤éƒ¨ç½²ç¯å¢ƒï¼Œä¹Ÿæ˜¯ä½¿ç”¨çš„é›†ç¾¤çš„uiæ¥å£
+	#http://172.16.2.14:5000/v2/_catalog æ˜¾ç¤ºçš„è‡ªå·±ç§æœ‰é•œåƒåº“çš„åˆ—è¡¨ï¼Œå³é…ç½®çš„registryèŠ‚ç‚¹åœ°å€
+	#å…­ä¸ªé•œåƒä¸‹è½½åœ°å€
 	#registry:2
-	#Ö±½ÓpullÏÂÀ´£¬ÔËĞĞ
+	#ç›´æ¥pullä¸‹æ¥ï¼Œè¿è¡Œ
 	docker pull registry:2
 	
 	docker stop registry
 	docker rm registry
-	#ä¯ÀÀÆ÷·ÃÎÊhttp://172.16.2.14:5000/v2/_catalog ÏÔÊ¾µÄ×Ô¼ºË½ÓĞ¾µÏñ¿âµÄÁĞ±í£¬ÓÖ¿ÉÄÜÊÇ¿Õ£¬µ«Ö»Òª²»±¨´í¾ÍĞĞ
+	#æµè§ˆå™¨è®¿é—®http://172.16.2.14:5000/v2/_catalog æ˜¾ç¤ºçš„è‡ªå·±ç§æœ‰é•œåƒåº“çš„åˆ—è¡¨ï¼Œåˆå¯èƒ½æ˜¯ç©ºï¼Œä½†åªè¦ä¸æŠ¥é”™å°±è¡Œ
 	docker run -d -p 5000:5000 --restart=always --name registry  registry:2
 	
-	#²¿Êğdashboard£¬½«ÏÂÃæµÄÁ½¸öÁ´½ÓÖ±½ÓpullÏÂÀ´
+	#éƒ¨ç½²dashboardï¼Œå°†ä¸‹é¢çš„ä¸¤ä¸ªé“¾æ¥ç›´æ¥pullä¸‹æ¥
 	#registry.access.redhat.com/rhel7/pod-infrastructure
 	#docker.io/mritd/kubernetes-dashboard-amd64 
 	
 	connect
 	docker pull docker.io/mritd/kubernetes-dashboard-amd64 
 	docker pull registry.access.redhat.com/rhel7/pod-infrastructure
-	#Ê¹ÓÃtag´´½¨ĞÂµÄÃû³Æ²¢ÉÏ´«µ½×Ô¼ºµÄ¾µÏñ¿â£¬±ãÓÚkubernetes-dashboard.yamlÏÂÔØ
+	#ä½¿ç”¨tagåˆ›å»ºæ–°çš„åç§°å¹¶ä¸Šä¼ åˆ°è‡ªå·±çš„é•œåƒåº“ï¼Œä¾¿äºkubernetes-dashboard.yamlä¸‹è½½
 	docker tag registry.access.redhat.com/rhel7/pod-infrastructure  pod-infrastructure:latest
 	docker tag  docker.io/mritd/kubernetes-dashboard-amd64  kubernetes-dashboard-amd64:latest
 	docker push pod-infrastructure
 	docker push kubernetes-dashboard-amd64
 
-	#²¿Êğdns·½Ê½ÖØ¸´²¿ÊğdashboardµÄpull ¡¢tag¡¢push ²½Öè
+	#éƒ¨ç½²dnsæ–¹å¼é‡å¤éƒ¨ç½²dashboardçš„pull ã€tagã€push æ­¥éª¤
 	connect
 	#docker.io/ist0ne/kubedns-amd64 
 	docker pull docker.io/ist0ne/kubedns-amd64 
@@ -51,7 +51,7 @@ function registry_init_update(){
 	docker pull docker.io/ist0ne/exechealthz-amd64 
 	docker tag docker.io/ist0ne/exechealthz-amd64 exechealthz-amd64:latest
 	docker push exechealthz-amd64
-	#ä¯ÀÀÆ÷·ÃÎÊhttp://172.16.2.14:5000/v2/_catalog ÕâÊ±¾ÍÓ¦¸ÃÏÔÊ¾Áô¸ö¾µÏñÁË
+	#æµè§ˆå™¨è®¿é—®http://172.16.2.14:5000/v2/_catalog è¿™æ—¶å°±åº”è¯¥æ˜¾ç¤ºç•™ä¸ªé•œåƒäº†
     
 	disconnect
 }

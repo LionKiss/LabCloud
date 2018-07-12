@@ -6,9 +6,9 @@ function caculate(formulation){
 
 
 var cloud = (function (){
-  /*ÈçºÎÊÕ¼¯½áµãĞÅÏ¢ÊÇ¸öÎÊÌâ.*/  //µÚÒ»¸öÄ¬ÈÏÎªÖ÷½ÚµãµÄIP
-  //ÎïÀí»úÌîĞ´·½Ê½{"IP":"172.16.2.133", "isMaster":true, "isPhysical": true, "MAC":"E0CB4EC8CF2E"}
-  //±¾»úÆô¶¯±¾»úĞéÄâ»úÌîĞ´·½Ê½{"IP":"172.16.2.95", "isMaster":false, "path":"D:\\wangqi\\src\\vm\\Kubernetes1\\Kubernetes.vmx"}
+  /*å¦‚ä½•æ”¶é›†ç»“ç‚¹ä¿¡æ¯æ˜¯ä¸ªé—®é¢˜.*/  //ç¬¬ä¸€ä¸ªé»˜è®¤ä¸ºä¸»èŠ‚ç‚¹çš„IP
+  //ç‰©ç†æœºå¡«å†™æ–¹å¼{"IP":"172.16.2.133", "isMaster":true, "isPhysical": true, "MAC":"E0CB4EC8CF2E"}
+  //æœ¬æœºå¯åŠ¨æœ¬æœºè™šæ‹Ÿæœºå¡«å†™æ–¹å¼{"IP":"172.16.2.95", "isMaster":false, "path":"D:\\wangqi\\src\\vm\\Kubernetes1\\Kubernetes.vmx"}
   var machines = [
     {"IP":"172.16.2.1", "isMaster":true, "path":"E:\\VirtualMachines\\docker1\\docker1.vmx"},
     {"IP":"172.16.2.95", "isMaster":false, "path":"E:\\VirtualMachines\\docker2\\docker1.vmx"},
@@ -16,23 +16,23 @@ var cloud = (function (){
 	{"IP":"172.16.2.19", "isMaster":false, "path":"E:\\VirtualMachines\\docker4\\docker1.vmx"}
   ];
   
-  //¶¨ÒåĞéÄâ»úµÄ°²×°Ä¿Â¼
+  //å®šä¹‰è™šæ‹Ÿæœºçš„å®‰è£…ç›®å½•
   var VMware_dir = "E:\\VMware\\VMwareWorkstation\\";
   
-  //ËŞÖ÷Ö÷»úIPµØÖ·
+  //å®¿ä¸»ä¸»æœºIPåœ°å€
   var suzu_host_ip = "172.16.2.73";
-  //ËŞÖ÷Ö÷»úµÇÂ¼ÓÃ»§Ãû
+  //å®¿ä¸»ä¸»æœºç™»å½•ç”¨æˆ·å
   var suzu_host_user = "lionkiss";
-  //ËŞÖ÷Ö÷»úµÇÂ¼ÃÜÂë
+  //å®¿ä¸»ä¸»æœºç™»å½•å¯†ç 
   var suzu_host_pwd = "123456";
   
-  //×¢Òâ£ºÕâÀïµÄhostname listÒªÓëmachinesÊı×éÖĞµÄIPË³Ğò¶ÔÓ¦Ò»ÖÂ
-  //µÚÒ»¸öÄ¬ÈÏÎªÖ÷½ÚµãµÄÖ÷»úÃû
+  //æ³¨æ„ï¼šè¿™é‡Œçš„hostname listè¦ä¸machinesæ•°ç»„ä¸­çš„IPé¡ºåºå¯¹åº”ä¸€è‡´
+  //ç¬¬ä¸€ä¸ªé»˜è®¤ä¸ºä¸»èŠ‚ç‚¹çš„ä¸»æœºå
   var hostnames = [
     {"hostname":"docker1 docker2 docker3 docker4"}
   ];
   
-  //¶¨ÒåÅäÖÃ¹ı³ÌĞèÒªµÄ±äÁ¿Ãû³Æ
+  //å®šä¹‰é…ç½®è¿‡ç¨‹éœ€è¦çš„å˜é‡åç§°
   var machineName = [{
     "master_hostname":"docker1",
 	"KUBE_master_hostname":"docker1",
@@ -43,13 +43,13 @@ var cloud = (function (){
 	"apiserver_host":"172.16.2.1",
 	"kube_master_url":"172.16.2.1"
   }];
-  //¿ª»úÃÜÂë
+  //å¼€æœºå¯†ç 
   var pwd = "hadoop";
 
   
-  //½«machinesĞ´Èëµ½±¾»úµÄhostsÎÄ¼şÖĞ
+  //å°†machineså†™å…¥åˆ°æœ¬æœºçš„hostsæ–‡ä»¶ä¸­
   function localHOSTS(){
-    var ForReading = 1, ForWriting = 2,ForAppending = 8;//ForAppending 8 ±íÊ¾´ò¿ªÎÄ¼ş²¢´ÓÎÄ¼şÄ©Î²¿ªÊ¼Ğ´¡£
+    var ForReading = 1, ForWriting = 2,ForAppending = 8;//ForAppending 8 è¡¨ç¤ºæ‰“å¼€æ–‡ä»¶å¹¶ä»æ–‡ä»¶æœ«å°¾å¼€å§‹å†™ã€‚
     var fso = new ActiveXObject("Scripting.FileSystemObject");
     var tmp      = fso.OpenTextFile("c:\\Windows\\System32\\drivers\\etc\\hosts", ForAppending, true);
     tmp.Write("\n" + dns2(machines));
@@ -63,56 +63,56 @@ var cloud = (function (){
     return d.join("\n");
   }
   
-  //¿ªÆôÈ«²¿ĞéÄâ»ú
+  //å¼€å¯å…¨éƒ¨è™šæ‹Ÿæœº
   function startAllVirtualMachines(){
 	
 	for(var i = 0;i<machines.length; i++){
 		var shell = new ActiveXObject("WScript.Shell");
 		var oExec = shell.Exec("plink -pw "+suzu_host_pwd+" "+suzu_host_user+"@"+suzu_host_ip);
-		//µÈµ½¿ÉÒÔ¶Á¾Í¿ÉÒÔĞ´Ö¸ÁîÁË£¬²»È»ÒªSleep
+		//ç­‰åˆ°å¯ä»¥è¯»å°±å¯ä»¥å†™æŒ‡ä»¤äº†ï¼Œä¸ç„¶è¦Sleep
 		//WScript.Sleep(1000);
 		WScript.Echo("reading " + oExec.StdOut.Read(1));
 	    var input = oExec.StdIn.Write(VMware_dir+"vmrun -T ws start "+machines[i].path+" \r\nexit\r\n");
-	    //µÈ´ıÖ´ĞĞ½áÊø
+	    //ç­‰å¾…æ‰§è¡Œç»“æŸ
 	    WScript.Echo("reading " + oExec.StdOut.ReadAll());
 	}
 	
 	return input;
   }
-  //¹Ø±ÕÈ«²¿ĞéÄâ»ú
+  //å…³é—­å…¨éƒ¨è™šæ‹Ÿæœº
   function stopAllVirtualMachines(){
 	
 	for(var i = 0;i<machines.length; i++){
 		var shell = new ActiveXObject("WScript.Shell");
 	    var oExec = shell.Exec("plink -pw "+suzu_host_pwd+" "+suzu_host_user+"@"+suzu_host_ip);
-        //µÈµ½¿ÉÒÔ¶Á¾Í¿ÉÒÔĞ´Ö¸ÁîÁË£¬²»È»ÒªSleep
+        //ç­‰åˆ°å¯ä»¥è¯»å°±å¯ä»¥å†™æŒ‡ä»¤äº†ï¼Œä¸ç„¶è¦Sleep
 	    //WScript.Sleep(1000);
 		WScript.Echo("reading " + oExec.StdOut.Read(1));
 	    var input = oExec.StdIn.Write(VMware_dir+"vmrun -T ws stop "+machines[i].path+" \r\nexit\r\n");
-	    //µÈ´ıÖ´ĞĞ½áÊø
+	    //ç­‰å¾…æ‰§è¡Œç»“æŸ
 	    WScript.Echo("reading " + oExec.StdOut.ReadAll());
 	}
 	
 	return input;
   }
-  //ÖØÆôÈ«²¿ĞéÄâ»ú
+  //é‡å¯å…¨éƒ¨è™šæ‹Ÿæœº
   function restartAllVirtualMachines(){
 	
 	for(var i = 0;i<machines.length; i++){
 		var shell = new ActiveXObject("WScript.Shell");
 		var oExec = shell.Exec("plink -pw "+suzu_host_pwd+" "+suzu_host_user+"@"+suzu_host_ip);
-		//µÈµ½¿ÉÒÔ¶Á¾Í¿ÉÒÔĞ´Ö¸ÁîÁË£¬²»È»ÒªSleep
+		//ç­‰åˆ°å¯ä»¥è¯»å°±å¯ä»¥å†™æŒ‡ä»¤äº†ï¼Œä¸ç„¶è¦Sleep
 		//WScript.Sleep(1000);
 		WScript.Echo("reading " + oExec.StdOut.Read(1));
 	    var input = oExec.StdIn.Write(VMware_dir+"vmrun -T ws reset "+machines[i].path+" \r\nexit\r\n");
-	    //µÈ´ıÖ´ĞĞ½áÊø
+	    //ç­‰å¾…æ‰§è¡Œç»“æŸ
 	    WScript.Echo("reading " + oExec.StdOut.ReadAll());
 		
 	}
 	
 	return input;
   }
-  //¿ªÆô¹Ø±ÕÖØÆôÄ³¼¸Ì¨»úÆ÷
+  //å¼€å¯å…³é—­é‡å¯æŸå‡ å°æœºå™¨
   function start_reset_stop_SomeVirtualMachines(flag,startNumber,endNumber){
 	var startORresetORstop = "";
 	if(flag=="start"){
@@ -132,11 +132,11 @@ var cloud = (function (){
 		for(var i = startNumber-1;i<endNumber; i++){
 			var shell = new ActiveXObject("WScript.Shell");
 			var oExec = shell.Exec("plink -pw "+suzu_host_pwd+" "+suzu_host_user+"@"+suzu_host_ip);
-			//µÈµ½¿ÉÒÔ¶Á¾Í¿ÉÒÔĞ´Ö¸ÁîÁË£¬²»È»ÒªSleep
+			//ç­‰åˆ°å¯ä»¥è¯»å°±å¯ä»¥å†™æŒ‡ä»¤äº†ï¼Œä¸ç„¶è¦Sleep
 			//WScript.Sleep(1000);
 			WScript.Echo("reading " + oExec.StdOut.Read(1));
 			var input = oExec.StdIn.Write(VMware_dir+"vmrun -T ws"+ startORresetORstop +machines[i].path+" \r\nexit\r\n");
-			//µÈ´ıÖ´ĞĞ½áÊø
+			//ç­‰å¾…æ‰§è¡Œç»“æŸ
 			WScript.Echo("reading " + oExec.StdOut.ReadAll());
 		}
 	}else{
@@ -154,8 +154,8 @@ var cloud = (function (){
 	//stopAllVirtualMachines();
   }
   
-  //ÕâÀïĞ´ÏµÍ³Æô¶¯µÄÏà¹Ø´úÂë
-  //ÅĞ¶Ï¿ª¹Ø»ú
+  //è¿™é‡Œå†™ç³»ç»Ÿå¯åŠ¨çš„ç›¸å…³ä»£ç 
+  //åˆ¤æ–­å¼€å…³æœº
   function isRunning(machine){
     var shell = WScript.CreateObject("WScript.Shell");    
 		var oExec = shell.Exec("ping -n 1 " + machine.IP);
@@ -176,7 +176,7 @@ var cloud = (function (){
     i + " " + machines.length + " " + machines[i].IP
     );
   }
-  //²é¿´¼¯ÈºµÄÔËĞĞ×´Ì¬
+  //æŸ¥çœ‹é›†ç¾¤çš„è¿è¡ŒçŠ¶æ€
   function runningState(){
     for(var i=0; i<machines.length; i++){
       show(machines, i);
@@ -185,10 +185,10 @@ var cloud = (function (){
   }
   
   
-  //ÉèÖÃ»úÆ÷µÄÖ÷»úÃûºÍIPµØÖ·£ºsetupIPhostname.sh
+  //è®¾ç½®æœºå™¨çš„ä¸»æœºåå’ŒIPåœ°å€ï¼šsetupIPhostname.sh
   function setupIPhostname(){
 	WScript.Echo("setupIPhostname");
-	//×¢Òâ£ºÕâÀïÄ¬ÈÏµÄyumÔ´ÊÇ×îĞÂµÄ£¬ÕâÀï²»¸üĞÂ
+	//æ³¨æ„ï¼šè¿™é‡Œé»˜è®¤çš„yumæºæ˜¯æœ€æ–°çš„ï¼Œè¿™é‡Œä¸æ›´æ–°
 	var ss = hostnames[0].hostname;
 	var hostname = ss.split(" ");
 	var iphostname = "";
@@ -200,7 +200,7 @@ var cloud = (function (){
 		}
 	}
 	for(var i =0;i<hostname.length;i++){
-		//ÎÄ¼şÌæ»»
+		//æ–‡ä»¶æ›¿æ¢
 		var ForReading = 1, ForWriting = 2;
 		var fso = new ActiveXObject("Scripting.FileSystemObject");
 		var template = fso.OpenTextFile("setupIPhostname.sh", ForReading);
@@ -209,21 +209,21 @@ var cloud = (function (){
 		tmp.Write(contentTemplate.replace(/hostname=\sIP_hostname=/g,"hostname="+hostname[i]+"\n"+"IP_hostname=\""+iphostname));
 		template.Close();
 		tmp     .Close();
-		//½«Ìæ»»µÄÎÄ¼şÍ¨¹ıputty½øĞĞÔ¶³ÌÖ´ĞĞ
+		//å°†æ›¿æ¢çš„æ–‡ä»¶é€šè¿‡puttyè¿›è¡Œè¿œç¨‹æ‰§è¡Œ
 		var shell = WScript.CreateObject("WScript.Shell");
-		//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+		//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 		shell.run("putty -m setupIPhostname.tmp"+i+".sh -pw " +pwd+ " root@" +machines[i].IP, 1, true);
 	}  
   }
   
-  //Ö÷½ÚµãÓë´Ó½Úµã¹²Í¬µÄÅäÖÃ
+  //ä¸»èŠ‚ç‚¹ä¸ä»èŠ‚ç‚¹å…±åŒçš„é…ç½®
   function common_init_MsaterSalve(){
     WScript.Echo("common_init_MsaterSalve");
-	//×¢Òâ£ºÕâÀïÄ¬ÈÏµÄyumÔ´ÊÇ×îĞÂµÄ£¬ÕâÀï²»¸üĞÂ
+	//æ³¨æ„ï¼šè¿™é‡Œé»˜è®¤çš„yumæºæ˜¯æœ€æ–°çš„ï¼Œè¿™é‡Œä¸æ›´æ–°
 	var ss = hostnames[0].hostname;
 	var hostname = ss.split(" ");
 	for(var i =0;i<hostname.length;i++){
-		//ÎÄ¼şÌæ»»
+		//æ–‡ä»¶æ›¿æ¢
 		var ForReading = 1, ForWriting = 2;
 		var fso = new ActiveXObject("Scripting.FileSystemObject");
 		var template = fso.OpenTextFile("common_init_MsaterSalve.sh", ForReading);
@@ -232,20 +232,20 @@ var cloud = (function (){
 		tmp.Write(contentTemplate.replace(/hostname=\sregistryHostname=\sapiserverHostname=\setcdHostname=/g,"hostname="+hostname[i]+"\n"+"registryHostname="+machineName[0].registryHostname+"\n"+"apiserverHostname="+machineName[0].apiserverHostname+"\n"+"etcdHostname="+machineName[0].etcdHostname+"\n"));
 		template.Close();
 		tmp     .Close();
-		//½«Ìæ»»µÄÎÄ¼şÍ¨¹ıputty½øĞĞÔ¶³ÌÖ´ĞĞ
+		//å°†æ›¿æ¢çš„æ–‡ä»¶é€šè¿‡puttyè¿›è¡Œè¿œç¨‹æ‰§è¡Œ
 		var shell = WScript.CreateObject("WScript.Shell");
-		//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+		//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 		shell.run("putty -m common_init_MsaterSalve.tmp"+i+".sh -pw " +pwd+ " root@" +machines[i].IP, 1, true);
 		//WScript.Echo("445554"+machines[i].IP);
 	}
   }
   
-  //µ¥¶ÀÅäÖÃÖ÷½Úµã
+  //å•ç‹¬é…ç½®ä¸»èŠ‚ç‚¹
   function only_init_master(){
     WScript.Echo("only_init_master");
 	var ss = hostnames[0].hostname;
 	var hostname = ss.split(" ");
-	//ÎÄ¼şÌæ»»
+	//æ–‡ä»¶æ›¿æ¢
 	var ForReading = 1, ForWriting = 2;
 	var fso = new ActiveXObject("Scripting.FileSystemObject");
 	var template = fso.OpenTextFile("only_init_master.sh", ForReading);
@@ -254,17 +254,17 @@ var cloud = (function (){
 	tmp.Write(contentTemplate.replace(/master_hostname=/g,"master_hostname="+machineName[0].master_hostname+"\n"));
 	template.Close();
 	tmp     .Close();
-	//½«Ìæ»»µÄÎÄ¼şÍ¨¹ıputty½øĞĞÔ¶³ÌÖ´ĞĞ
+	//å°†æ›¿æ¢çš„æ–‡ä»¶é€šè¿‡puttyè¿›è¡Œè¿œç¨‹æ‰§è¡Œ
 	var shell = WScript.CreateObject("WScript.Shell");
-	//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+	//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 	shell.run("putty -m only_init_master.tmp.sh -pw " +pwd+ " root@" +machines[0].IP, 1, true);
 	//WScript.Echo("445554"+machines[i].IP);
   }
-  //µ¥¶ÀÅäÖÃ´Ó½Úµã
+  //å•ç‹¬é…ç½®ä»èŠ‚ç‚¹
   function only_init_salve(){
     WScript.Echo("only_init_salve");
 	for(var i =1;i<machines.length;i++){
-		//ÎÄ¼şÌæ»»
+		//æ–‡ä»¶æ›¿æ¢
 		var ForReading = 1, ForWriting = 2;
 		var fso = new ActiveXObject("Scripting.FileSystemObject");
 		var template = fso.OpenTextFile("only_init_salve.sh", ForReading);
@@ -273,38 +273,38 @@ var cloud = (function (){
 		tmp.Write(contentTemplate.replace(/KUBE_master_hostname=/g,"KUBE_master_hostname="+machineName[0].KUBE_master_hostname+"\n"));
 		template.Close();
 		tmp     .Close();
-		//½«Ìæ»»µÄÎÄ¼şÍ¨¹ıputty½øĞĞÔ¶³ÌÖ´ĞĞ
+		//å°†æ›¿æ¢çš„æ–‡ä»¶é€šè¿‡puttyè¿›è¡Œè¿œç¨‹æ‰§è¡Œ
 		var shell = WScript.CreateObject("WScript.Shell");
-		//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+		//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 		shell.run("putty -m only_init_salve.tmp"+i+".sh -pw " +pwd+ " root@" +machines[i].IP, 1, true);
 		//WScript.Echo("445554"+machines[i].IP);
 	}
   }
-  //Ö÷½ÚµãÓë´Ó½ÚµãÆô¶¯
+  //ä¸»èŠ‚ç‚¹ä¸ä»èŠ‚ç‚¹å¯åŠ¨
   function start_docker_cloud(){
 	WScript.Echo("start_docker_cloud");
 	var shell = WScript.CreateObject("WScript.Shell");
-	//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+	//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 	shell.run("putty -m setupMaster.sh -pw " +pwd+ " root@" +machines[0].IP, 1, true);
 	for(var i =1;i<machines.length;i++){
-		//½«ÎÄ¼şÍ¨¹ıputty½øĞĞÔ¶³ÌÖ´ĞĞ
+		//å°†æ–‡ä»¶é€šè¿‡puttyè¿›è¡Œè¿œç¨‹æ‰§è¡Œ
 		var shell = WScript.CreateObject("WScript.Shell");
-		//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+		//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 		shell.run("putty -m setupSalve.sh -pw " +pwd+ " root@" +machines[i].IP, 1, true);
 	}
   }
-  //Åä¸øregistry¾µÏñ±¾µØ¿â
+  //é…ç»™registryé•œåƒæœ¬åœ°åº“
   function registry_init_update(){
-	//½«Ìæ»»µÄÎÄ¼şÍ¨¹ıputty½øĞĞÔ¶³ÌÖ´ĞĞ
+	//å°†æ›¿æ¢çš„æ–‡ä»¶é€šè¿‡puttyè¿›è¡Œè¿œç¨‹æ‰§è¡Œ
 	var shell = WScript.CreateObject("WScript.Shell");
-	//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+	//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 	shell.run("putty -m registry_init_update.sh -pw " +pwd+ " root@" +machineName[0].registryHostIP, 1, true); 
 	start_docker_cloud();
   }
-  //ÅäÖÃdashboard skydns kubedns Èı¸öyamlÎÄ¼ş
+  //é…ç½®dashboard skydns kubedns ä¸‰ä¸ªyamlæ–‡ä»¶
   function dashboard_skydns_kubedns(){
 	WScript.Echo("dashboard_skydns_kube-dns");
-	//ÎÄ¼şÌæ»»
+	//æ–‡ä»¶æ›¿æ¢
 	var ForReading = 1, ForWriting = 2;
 	var fso = new ActiveXObject("Scripting.FileSystemObject");
 	var template = fso.OpenTextFile("dashboard_skydns_kubedns.sh", ForReading);
@@ -313,18 +313,18 @@ var cloud = (function (){
 	tmp.Write(contentTemplate.replace(/registryHostname=\sapiserver_host=\skube_master_url=/g,"registryHostname="+machineName[0].registryHostname+"\n"+"apiserver_host="+machineName[0].apiserver_host+"\n"+"kube_master_url="+machineName[0].kube_master_url+"\n"));
 	template.Close();
 	tmp     .Close();
-	//½«Ìæ»»µÄÎÄ¼şÍ¨¹ıputty½øĞĞÔ¶³ÌÖ´ĞĞ
+	//å°†æ›¿æ¢çš„æ–‡ä»¶é€šè¿‡puttyè¿›è¡Œè¿œç¨‹æ‰§è¡Œ
 	var shell = WScript.CreateObject("WScript.Shell");
-	//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+	//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 	shell.run("putty -m dashboard_skydns_kubedns.tmp.sh -pw " +pwd+ " root@" +machines[0].IP, 1, true); 
 	start_docker_cloud();
   }
   function IPandHostnameSetup(){
 	  localHOSTS();
 	  setupIPhostname();
-	  WScript.Echo("ÇëÖØÆôËùÓĞµçÄÔ£¬Íê³ÉÖ÷»úÃûÒÔ¼°IPÓ³ÉäÅäÖÃÉúĞ§£¬ÔÙÖ´ĞĞOne_button_loader¹¦ÄÜº¯Êı£¬Ò»¼ü×°»ú");
+	  WScript.Echo("è¯·é‡å¯æ‰€æœ‰ç”µè„‘ï¼Œå®Œæˆä¸»æœºåä»¥åŠIPæ˜ å°„é…ç½®ç”Ÿæ•ˆï¼Œå†æ‰§è¡ŒOne_button_loaderåŠŸèƒ½å‡½æ•°ï¼Œä¸€é”®è£…æœº");
   }
-  //ÅäÖÃºÃºóÒ»¼üÊ½×°»ú
+  //é…ç½®å¥½åä¸€é”®å¼è£…æœº
   function One_button_loader(){
 	  localHOSTS();
 	  setupIPhostname();
@@ -336,13 +336,13 @@ var cloud = (function (){
 	  start_docker_cloud();
 	  registry_init_update();
 	  dashboard_skydns_kubedns();
-	  WScript.Echo("Èç¹ûÊ§°Ü£¬»òĞíÊÇregistry.access.redhat.com/rhel7/pod-infrastructure²»ÄÜË³ÀûÏÂÔØ£¡");
-	  WScript.Echo("ÇëÖ´ĞĞregistry_init_update£¬ÔÙÖ´ĞĞdashboard_skydns_kubedns£¡");
+	  WScript.Echo("å¦‚æœå¤±è´¥ï¼Œæˆ–è®¸æ˜¯registry.access.redhat.com/rhel7/pod-infrastructureä¸èƒ½é¡ºåˆ©ä¸‹è½½ï¼");
+	  WScript.Echo("è¯·æ‰§è¡Œregistry_init_updateï¼Œå†æ‰§è¡Œdashboard_skydns_kubednsï¼");
   }
   
-  //º¯Êı¶ÔÓ¦
+  //å‡½æ•°å¯¹åº”
   return {
-	  //½Å±¾³õ´ÎÖ´ĞĞÊ±£¬±ØĞëÒªÏÈÖ´ĞĞlocalHOSTS£¬ÎÒÒ²²»ÖªÎªÊ²Ã´£¿
+	  //è„šæœ¬åˆæ¬¡æ‰§è¡Œæ—¶ï¼Œå¿…é¡»è¦å…ˆæ‰§è¡ŒlocalHOSTSï¼Œæˆ‘ä¹Ÿä¸çŸ¥ä¸ºä»€ä¹ˆï¼Ÿ
 	  localHOSTS:localHOSTS,
 	  setupIPhostname:setupIPhostname,
 	  restartAllVirtualMachines:restartAllVirtualMachines,
@@ -361,7 +361,7 @@ var cloud = (function (){
 /*main*/
 (function main(){
 	
-	/*ÉèÖÃÄ¬ÈÏÖ´ĞĞÒıÇæ
+	/*è®¾ç½®é»˜è®¤æ‰§è¡Œå¼•æ“
 	
 	cscript //h:cscript
 	

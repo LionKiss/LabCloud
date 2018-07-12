@@ -18,15 +18,15 @@ yum provides '*/applydeltarpm'
 配置新的国内镜像163yum源
 下载repo文件 
 cd /etc/yum.repos.d
-mv CentOS-Base.repo CentOS-Base.repo.bk  
 yum install -y wget
-wget -O CentOS-Base.repo http://mirrors.163.com/.help/CentOS6-Base-163.repo 
+mv CentOS-Base.repo CentOS-Base.repo.bk  
+wget -O CentOS-Base.repo http://mirrors.163.com/.help/CentOS7-Base-163.repo 
 执行yum源更新
 清除以前使用yum的缓存
 yum clean all      
 建立一个缓存，以后方便在缓存中搜索
-yum makecache
 yum --enablerepo=extras clean metadata
+yum makecache
 yum -y update
 yum install -y deltarpm
 yum provides '*/applydeltarpm'

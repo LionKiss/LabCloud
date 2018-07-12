@@ -1,0 +1,312 @@
+
+
+docker ps -a | grep ten
+#查看service来查看对应的容器的ip
+kubectl describe service tensorflow-ps-service
+kubectl describe service tensorflow-wk-service
+
+综测 1和2
+python SimpleDistribut.py --ps_hosts=192.168.100.3:2222,192.168.8.5:2222 --worker_hosts=192.168.100.4:2222,192.168.8.6:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.100.3:2222,192.168.8.5:2222 --worker_hosts=192.168.100.4:2222,192.168.8.6:2222 --job_name=ps --task_index=1
+
+python SimpleDistribut.py --ps_hosts=192.168.100.3:2222,192.168.8.5:2222 --worker_hosts=192.168.100.4:2222,192.168.8.6:2222 --job_name=worker --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.100.3:2222,192.168.8.5:2222 --worker_hosts=192.168.100.4:2222,192.168.8.6:2222 --job_name=worker --task_index=1
+
+
+cd /opt/pydev/
+rm -rf /opt/pydev/checkpoint
+mkdir checkpoint
+rm -rf SimpleDistribut.py
+curl -O https://raw.githubusercontent.com/LionKiss/distributionCNNmnist/master/SimpleDistribut.py
+
+
+综测 1和3
+#ps
+python SimpleDistribut.py --ps_hosts=192.168.24.6:32221,192.168.9.9:32222 --worker_hosts=192.168.24.5:32221,192.168.9.10:32222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.24.6:32221,192.168.9.9:32222 --worker_hosts=192.168.24.5:32221,192.168.9.10:32222 --job_name=ps --task_index=1
+#wk
+python SimpleDistribut.py --ps_hosts=192.168.24.6:32221,192.168.9.9:32222 --worker_hosts=192.168.24.5:32221,192.168.9.10:32222 --job_name=worker --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.24.6:32221,192.168.9.9:32222 --worker_hosts=192.168.24.5:32221,192.168.9.10:32222 --job_name=worker --task_index=1
+
+#ps 测试
+python SimpleDistribut.py --ps_hosts=172.16.2.123:32221,172.16.2.56:32222 --worker_hosts=172.16.2.123:32221,172.16.2.56:32222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=172.16.2.123:32221,172.16.2.56:32222 --worker_hosts=172.16.2.123:32221,172.16.2.56:32222 --job_name=ps --task_index=1
+#wk
+python SimpleDistribut.py --ps_hosts=172.16.2.123:32221,172.16.2.56:32222 --worker_hosts=172.16.2.123:32221,172.16.2.56:32222 --job_name=worker --task_index=0
+python SimpleDistribut.py --ps_hosts=172.16.2.123:32221,172.16.2.56:32222 --worker_hosts=172.16.2.123:32221,172.16.2.56:32222 --job_name=worker --task_index=1
+
+
+node1
+python SimpleDistribut.py --ps_hosts=192.168.8.3:2222,192.168.100.3:2222 --worker_hosts=192.168.8.4:2222,192.168.100.4:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.8.3:2222,192.168.100.3:2222 --worker_hosts=192.168.8.4:2222,192.168.100.4:2222 --job_name=worker --task_index=0
+node2
+python SimpleDistribut.py --ps_hosts=192.168.8.3:2222,192.168.100.3:2222 --worker_hosts=192.168.8.4:2222,192.168.100.4:2222 --job_name=ps --task_index=1
+python SimpleDistribut.py --ps_hosts=192.168.8.3:2222,192.168.100.3:2222 --worker_hosts=192.168.8.4:2222,192.168.100.4:2222 --job_name=worker --task_index=1
+
+
+
+#ps
+python woDistribut.py --ps_hosts=192.168.61.3:2222,192.168.88.2:2222 --worker_hosts=192.168.61.4:2222,192.168.88.3:2222 --job_name=ps --task_index=0
+python woDistribut.py --ps_hosts=192.168.61.3:2222,192.168.88.2:2222 --worker_hosts=192.168.61.4:2222,192.168.88.3:2222 --job_name=ps --task_index=1
+#wk
+python woDistribut.py --ps_hosts=192.168.61.3:2222,192.168.88.2:2222 --worker_hosts=192.168.61.4:2222,192.168.88.3:2222 --job_name=worker --task_index=0
+python woDistribut.py --ps_hosts=192.168.61.3:2222,192.168.88.2:2222 --worker_hosts=192.168.61.4:2222,192.168.88.3:2222 --job_name=worker --task_index=1
+
+
+#ps
+python SimpleDistribut.py --ps_hosts=192.168.61.3:2222,192.168.88.2:2222 --worker_hosts=192.168.61.4:2222,192.168.88.3:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.61.3:2222,192.168.88.2:2222 --worker_hosts=192.168.61.4:2222,192.168.88.3:2222 --job_name=ps --task_index=1
+#wk
+python SimpleDistribut.py --ps_hosts=192.168.61.3:2222,192.168.88.2:2222 --worker_hosts=192.168.61.4:2222,192.168.88.3:2222 --job_name=worker --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.61.3:2222,192.168.88.2:2222 --worker_hosts=192.168.61.4:2222,192.168.88.3:2222 --job_name=worker --task_index=1
+
+
+python SimpleDistribut.py --ps_hosts=192.168.61.5:2222 --worker_hosts=192.168.61.4:2222,192.168.88.5:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.61.5:2222 --worker_hosts=192.168.61.4:2222,192.168.88.5:2222 --job_name=worker --task_index=0
+
+cd /opt/pydev/
+rm -rf /opt/pydev/checkpoint
+mkdir checkpoint
+rm -rf SimpleDistribut.py
+curl -O https://raw.githubusercontent.com/LionKiss/distributionCNNmnist/master/SimpleDistribut.py
+#ps
+python SimpleDistribut.py --ps_hosts=192.168.100.3:32222,192.168.8.3:32222 --worker_hosts=192.168.100.4:32222,192.168.8.4:32222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.100.3:32222,192.168.8.3:32222 --worker_hosts=192.168.100.4:32222,192.168.8.4:32222 --job_name=ps --task_index=1
+#wk
+python SimpleDistribut.py --ps_hosts=192.168.100.3:32222,192.168.8.3:32222 --worker_hosts=192.168.100.4:32222,192.168.8.4:32222 --job_name=worker --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.100.3:32222,192.168.8.3:32222 --worker_hosts=192.168.100.4:32222,192.168.8.4:32222 --job_name=worker --task_index=1
+
+
+
+
+
+
+
+
+
+
+
+
+综测 1和4
+python SimpleDistribut.py --ps_hosts=192.168.13.2:2222,192.168.8.4:2222 --worker_hosts=192.168.13.3:2222,192.168.8.5:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.13.2:2222,192.168.8.4:2222 --worker_hosts=192.168.13.3:2222,192.168.8.5:2222 --job_name=ps --task_index=1
+
+python SimpleDistribut.py --ps_hosts=192.168.13.2:2222,192.168.8.4:2222 --worker_hosts=192.168.13.3:2222,192.168.8.5:2222 --job_name=worker --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.13.2:2222,192.168.8.4:2222 --worker_hosts=192.168.13.3:2222,192.168.8.5:2222 --job_name=worker --task_index=1
+
+
+
+
+
+单侧
+python SimpleDistribut.py --ps_hosts=192.168.8.6:2222 --worker_hosts=192.168.8.7:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.8.6:2222 --worker_hosts=192.168.8.7:2222 --job_name=worker --task_index=0
+
+python SimpleDistribut.py --ps_hosts=192.168.61.4:2222 --worker_hosts=192.168.61.5:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.61.4:2222 --worker_hosts=192.168.61.5:2222 --job_name=worker --task_index=0
+
+python SimpleDistribut.py --ps_hosts=192.168.100.3:2222 --worker_hosts=192.168.100.4:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.100.3:2222 --worker_hosts=192.168.100.4:2222 --job_name=worker --task_index=0
+
+python SimpleDistribut.py --ps_hosts=192.168.77.2:2222 --worker_hosts=192.168.77.3:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.77.2:2222 --worker_hosts=192.168.77.3:2222 --job_name=worker --task_index=0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+curl https://codeload.github.com/tobegit3hub/deep_recommend_system/zip/master -o drs.zip
+unzip drs.zip
+cd tensorflow_template_application-master/distributed/
+
+#ps
+nohup python dense_classifier.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=ps --task_index=0 >log1 &
+nohup python dense_classifier.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=ps --task_index=1 >log2 &
+#wk
+nohup python dense_classifier.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=worker --task_index=0 >log &
+nohup python dense_classifier.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=worker --task_index=1 >log &
+
+
+
+cd /opt/pydev
+rm -rf /opt/pydev/checkpoint
+mkdir checkpoint
+rm -rf CNNtestpy2Distribut.py
+curl -O https://raw.githubusercontent.com/LionKiss/distributionCNNmnist/master/CNNtestpy2Distribut.py
+
+后台
+nohup python CNNtestpy2Distribut.py --ps_hosts=192.168.28.8:2222,192.168.90.3:2222 --worker_hosts=192.168.28.9:2222,192.168.90.4:2222 --job_name=ps --task_index=0 >log1 &
+nohup python CNNtestpy2Distribut.py --ps_hosts=192.168.28.8:2222,192.168.90.3:2222 --worker_hosts=192.168.28.9:2222,192.168.90.4:2222 --job_name=ps --task_index=1 >log2 &
+nohup python CNNtestpy2Distribut.py --ps_hosts=192.168.28.8:2222,192.168.90.3:2222 --worker_hosts=192.168.28.9:2222,192.168.90.4:2222 --job_name=worker --task_index=0 >log &
+nohup python CNNtestpy2Distribut.py --ps_hosts=192.168.28.8:2222,192.168.90.3:2222 --worker_hosts=192.168.28.9:2222,192.168.90.4:2222 --job_name=worker --task_index=1 >log &
+
+不在后台
+python CNNtestpy2Distribut.py --ps_hosts=192.168.28.6:2222,192.168.90.4:2222 --worker_hosts=192.168.28.7:2222,192.168.90.5:2222 --job_name=ps --task_index=0
+python CNNtestpy2Distribut.py --ps_hosts=192.168.28.6:2222,192.168.90.4:2222 --worker_hosts=192.168.28.7:2222,192.168.90.5:2222 --job_name=worker --task_index=0
+python CNNtestpy2Distribut.py --ps_hosts=192.168.28.6:2222,192.168.90.4:2222 --worker_hosts=192.168.28.7:2222,192.168.90.5:2222 --job_name=ps --task_index=1
+python CNNtestpy2Distribut.py --ps_hosts=192.168.28.6:2222,192.168.90.4:2222 --worker_hosts=192.168.28.7:2222,192.168.90.5:2222 --job_name=worker --task_index=1
+单侧
+python CNNtestpy2Distribut.py --ps_hosts=192.168.28.6:2222 --worker_hosts=192.168.28.7:2222 --job_name=ps --task_index=0
+python CNNtestpy2Distribut.py --ps_hosts=192.168.28.6:2222 --worker_hosts=192.168.28.7:2222 --job_name=worker --task_index=0
+
+python CNNtestpy2Distribut.py --ps_hosts=192.168.90.4:2222 --worker_hosts=192.168.90.5:2222 --job_name=ps --task_index=0
+python CNNtestpy2Distribut.py --ps_hosts=192.168.90.4:2222 --worker_hosts=192.168.90.5:2222 --job_name=worker --task_index=0
+
+再测简单版的试试
+cd /opt/pydev
+rm -rf /opt/pydev/checkpoint
+mkdir checkpoint
+rm -rf SimpleDistribut.py
+curl -O https://raw.githubusercontent.com/LionKiss/distributionCNNmnist/master/SimpleDistribut.py
+
+单侧
+python SimpleDistribut.py --ps_hosts=192.168.28.6:2222 --worker_hosts=192.168.28.7:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.28.6:2222 --worker_hosts=192.168.28.7:2222 --job_name=worker --task_index=0
+
+python SimpleDistribut.py --ps_hosts=192.168.90.4:2222 --worker_hosts=192.168.90.6:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.90.4:2222 --worker_hosts=192.168.90.6:2222 --job_name=worker --task_index=0
+
+综测
+python SimpleDistribut.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=worker --task_index=0
+
+python SimpleDistribut.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=ps --task_index=1
+python SimpleDistribut.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=worker --task_index=1
+
+
+
+
+cd /
+rm -rf /drs.zip
+rm -rf tensorflow_template_application-master*
+curl https://codeload.github.com/LionKiss/tensorflow_template_application-master/zip/master -o drs.zip
+unzip drs.zip
+cd /tensorflow_template_application-master-master/distributed
+
+#ps
+python dense_classifier.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=ps --task_index=0
+python dense_classifier.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=ps --task_index=1
+#wk
+python dense_classifier.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=worker --task_index=0
+python dense_classifier.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=worker --task_index=1
+
+
+cd /opt/pydev
+rm -rf /opt/pydev/checkpoint
+mkdir checkpoint
+rm -rf CNNtestpy2Distribut.py
+curl -O https://raw.githubusercontent.com/LionKiss/distributionCNNmnist/master/CNNtestpy2Distribut.py
+
+#ps
+python CNNtestpy2Distribut.py --ps_hosts=192.168.8.2:2222,192.168.61.2:2222 --worker_hosts=192.168.8.4:2222,192.168.61.3:2222 --job_name=ps --task_index=0
+python CNNtestpy2Distribut.py --ps_hosts=192.168.8.2:2222,192.168.61.2:2222 --worker_hosts=192.168.8.4:2222,192.168.61.3:2222 --job_name=ps --task_index=1
+#wk
+python CNNtestpy2Distribut.py --ps_hosts=192.168.8.2:2222,192.168.61.2:2222 --worker_hosts=192.168.8.4:2222,192.168.61.3:2222 --job_name=worker --task_index=0
+python CNNtestpy2Distribut.py --ps_hosts=192.168.8.2:2222,192.168.61.2:2222 --worker_hosts=192.168.8.4:2222,192.168.61.3:2222 --job_name=worker --task_index=1
+
+
+cd /opt/pydev
+rm -rf /opt/pydev/checkpoint
+mkdir checkpoint
+rm -rf SimpleDistribut.py
+curl -O https://raw.githubusercontent.com/LionKiss/distributionCNNmnist/master/SimpleDistribut.py
+
+#ps
+python SimpleDistribut.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=ps --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=ps --task_index=1
+#wk
+python SimpleDistribut.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=worker --task_index=0
+python SimpleDistribut.py --ps_hosts=192.168.28.2:2222,192.168.59.2:2222 --worker_hosts=192.168.28.5:2222,192.168.59.3:2222 --job_name=worker --task_index=1
+
+
+
+
+node0:5000/prom/prometheus                      latest              e193f6cc7063        3 days ago          113.3 MB
+node0:5000/grafana/grafana                      latest              d3d0a65783de        3 days ago          300.9 MB
+node0:5000/giantswarm/tiny-tools                latest              828c2acc9c7a        13 days ago         25.84 MB
+node0:5000/tomcat                               latest              a92c139758db        6 weeks ago         557.4 MB
+node0:5000/mysql                                latest              f008d8ff927d        7 weeks ago         408.5 MB
+node0:5000/nginx-ingress                        latest              95be5a5b9307        8 weeks ago         133.9 MB
+node0:5000/node                                 v1                  a15033e7f8df        9 weeks ago         672.5 MB
+node0:5000/nginx                                latest              3f8a4339aadd        10 weeks ago        108.5 MB
+node0:5000/prom/node-exporter                   latest              ff5ecdcfc4a2        3 months ago        22.8 MB
+node0:5000/busybox                              latest              6ad733544a63        4 months ago        1.129 MB
+node0:5000/pod-infrastructure                   latest              99965fb98423        4 months ago        208.6 MB
+node0:5000/prometheus/alertmanager              v0.7.1              822973257511        9 months ago        17.63 MB
+node0:5000/googlecontainer/kube-state-metrics   v0.5.0              5981204fed57        10 months ago       45.61 MB
+node0:5000/grafana/grafana                      4.2.0               8c4ef64b4ad1        11 months ago       277.9 MB
+node0:5000/bigwhite/fluentd-elasticsearch       1.22                7896bdf952bf        14 months ago       266.2 MB
+node0:5000/kubedns-amd64                        latest              26cf1ed9b144        15 months ago       47 MB
+node0:5000/kubernetes-dashboard-amd64           latest              75f167b703e6        17 months ago       86.27 MB
+node0:5000/dockermuenster/caddy                 0.9.3               f883ac96868d        17 months ago       33.19 MB
+node0:5000/kube-dnsmasq-amd64                   latest              3ec65756a89b        17 months ago       5.126 MB
+node0:5000/exechealthz-amd64                    latest              93a43bfb39bf        17 months ago       8.375 MB
+node0:5000/kubeguide/tomcat-app                 v1                  a29e200a18e9        20 months ago       358.2 MB
+node0:5000/pilchard/hpa-example                 latest              1ef959421baf        2 years ago         480.7 MB
+node0:5000/kubeguide/redis-master               latest              405a0b586f7e        2 years ago         419.1 MB
+node0:5000/kubeguide/guestbook-redis-slave      latest              e0c36a1fa372        2 years ago         109.5 MB
+node0:5000/fluentd-elasticsearch                latest              6f57ef303ccc        3 years ago         550.9 MB
+
+
+监控有用的
+node0:5000/prom/prometheus                      latest              e193f6cc7063        3 days ago          113.3 MB
+node0:5000/giantswarm/tiny-tools                latest              828c2acc9c7a        13 days ago         25.84 MB
+node0:5000/prom/node-exporter                   latest              ff5ecdcfc4a2        3 months ago        22.8 MB
+node0:5000/busybox                              latest              6ad733544a63        4 months ago        1.129 MB
+node0:5000/prometheus/alertmanager              v0.7.1              822973257511        9 months ago        17.63 MB
+node0:5000/googlecontainer/kube-state-metrics   v0.5.0              5981204fed57        10 months ago       45.61 MB
+node0:5000/grafana/grafana                      4.2.0               8c4ef64b4ad1        11 months ago       277.9 MB
+node0:5000/kubedns-amd64                        latest              26cf1ed9b144        15 months ago       47 MB
+node0:5000/dockermuenster/caddy                 0.9.3               f883ac96868d        17 months ago       33.19 MB
+
+
+kubectl get service --namespace=monitoring
+
+kubectl describe svc prometheus-node-exporter --namespace=monitoring
+
+http://172.16.2.179:8080/api/v1/proxy/namespaces/monitoring/services/prometheus-node-exporter/
+
+http://172.16.2.179:8080/api/v1/proxy/namespaces/monitoring/pods/node-directory-size-metrics-9b8mt/metrics
+
+kubectl delete namespace monitoring
+
+kubectl apply --filename manifests-all.yaml 
+
+
+额外需要下载的镜像
+docker pull docker.io/elcolio/etcd
+docker tag docker.io/elcolio/etcd node2:5000/etcd
+docker push  node2:5000/etcd
+
+docker pull docker.io/kubernetes/kube2sky
+docker tag docker.io/kubernetes/kube2sky node2:5000/kube2sky
+docker push node2:5000/kube2sky
+
+docker pull docker.io/skynetservices/skydns 
+docker tag docker.io/skynetservices/skydns node2:5000/skydns 
+docker push node2:5000/skydns 
+
+docker pull docker.io/busybox
+docker tag docker.io/busybox node2:5000/busybox
+docker push node2:5000/busybox
+
+
+http://blog.csdn.net/silentwolfyh/article/details/52047780
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org  
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm  
+yum --enablerepo=elrepo-kernel install  kernel-ml-devel kernel-ml  
+yum groupinstall "Development Tools" -y           #安装开发工具包
+yum install -y elfutils-libelf-devel bc openssl-devel ncurses-devel wget ntpdate vim net-tools        #安装常用软件

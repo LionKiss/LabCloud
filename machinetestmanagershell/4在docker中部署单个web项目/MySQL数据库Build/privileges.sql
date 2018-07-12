@@ -7,7 +7,7 @@ set `character_set_server` = utf8;
 use mysql;
 update  user set host = '%' where user= 'root';
 select host, user from user;
-# ½«docker_mysqlÊı¾İ¿âµÄÈ¨ÏŞÊÚÈ¨¸ø´´½¨µÄdockerÓÃ»§£¬ÃÜÂëÎª123456£º
+# å°†docker_mysqlæ•°æ®åº“çš„æƒé™æˆæƒç»™åˆ›å»ºçš„dockerç”¨æˆ·ï¼Œå¯†ç ä¸º123456ï¼š
 grant all privileges on *.* to 'root'@'%' identified by '123' with grant option;
-# ÕâÒ»ÌõÃüÁîÒ»¶¨ÒªÓĞ£º
+# è¿™ä¸€æ¡å‘½ä»¤ä¸€å®šè¦æœ‰ï¼š
 flush privileges;

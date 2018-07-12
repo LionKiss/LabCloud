@@ -1,0 +1,127 @@
+#下载镜像activemq，重命名，提交到本地仓库
+#docker pull webcenter/activemq
+docker tag webcenter/activemq node0:5000/webcenter/activemq
+docker push node0:5000/webcenter/activemq
+#后台运行,-P显示默认的映射端口，加不加都可。拷贝出镜像中的ActiveMQ的配置文件和jar包，路径为
+docker run -d -it -P --name activemq1 node0:5000/webcenter/activemq  /bin/bash
+rm -rf ~/activemq/activemq.xml
+mkdir -p ~/activemq/
+docker cp activemq1:/opt/activemq/conf/activemq.xml ~/activemq/
+cat ~/activemq/activemq.xml
+docker cp activemq1:/opt/activemq/activemq-all-5.14.3.jar ~/activemq/
+docker stop activemq1
+docker rm activemq1
+#运行程序，查看界面
+这里需要进入到容器中启动。应为其包含三个系统：Linux、macos\windows,所以不能默认启动
+其中地址
+cd /opt/activemq/bin
+./linux-x86-64/activemq start
+http://172.16.2.123:8161/ 访问即可
+
+#阿里云的也如此
+docker pull registry.cn-hangzhou.aliyuncs.com/daydayup/activemq
+docker tag registry.cn-hangzhou.aliyuncs.com/daydayup/activemq node0:5000/aliyun/activemq
+docker push node0:5000/aliyun/activemq
+docker run -d -it -P --name activemq2 node0:5000/aliyun/activemq  /bin/bash
+
+#第二步
+制作启动镜像
+cat > Dockerfile <<EOF
+FROM node0:5000/webcenter/activemq
+CMD sh /opt/activemq/bin/linux-x86-64/activemq start && /bin/bash
+EXPOSE 61616 8161
+EOF
+docker build -t zqqactivemq .
+docker push zqqactivemq
+docker run -it -d -P --name activemq2 zqqactivemq
+docker stop activemq2
+docker rm activemq2
+#第三步简单测试
+点对点的：程序A发送消息，程序B监听，接收消息，
+代码：容器云中启动即可
+docker run -it -d -p 61617:61616 -p 8161:8161 --name activemq2 zqqactivemq
+java代码，见文件夹activemq
+
+#第四步测试
+pub/sub的：程序A发送消息两个话题，程序B监听一个话题，接收消息，程序C监听一个话题，接收消息，
+代码：容器云中启动即可
+docker run -it -d -p 61617:61616 -p 8161:8161 --name activemq2 zqqactivemq
+java代码，见文件夹activemqpubsub
+
+#第五步测试
+搭建ActiveMQ集群，使用cluster-borker方式
+五个示例，两个hub备份，两个borker链接，，pub链接hub，，sub链接任意一个borker
+主要修改两个地方
+ brokerName="localhost" 
+ 注释掉其他的，并修改openwire
+ <transportConnector name="openwire" uri="tcp://0.0.0.0:61616?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+ hub中设置<networkConnectors>标签
+ 1、端口规划容器映射	
+activemq1: 61616 (broker1)
+activemq2: 61626 (broker2)
+activemq3: 61636 (broker3)
+activemq4: 61646 (brokerhub1)
+activemq5: 61656 (brokerhub2)
+
+共5个activemq实例，端口61616、61626、61636为broker1、broker2、broker3，61645、61656为brokerhub1、brokerhub2 
+ 2,将配置文件夹的五个文件拷贝到centos中的一个目录，使用volume方式挂载启动
+ broker1、broker2、broker3
+ docker run -d -it -p 8161:8161 -p 61616:61616 -v /root/activemq/activemq.borker1.xml:/opt/activemq/conf/activemq.xml --name zqqactivemq1 zqqactivemq
+ docker run -d -it -p 8162:8161 -p 61626:61616 -v /root/activemq/activemq.borker2.xml:/opt/activemq/conf/activemq.xml --name zqqactivemq2 zqqactivemq  
+ docker run -d -it -p 8163:8161 -p 61636:61616 -v /root/activemq/activemq.borker3.xml:/opt/activemq/conf/activemq.xml --name zqqactivemq3 zqqactivemq  
+ brokerhub1、brokerhub2 
+ docker run -d -it -p 8164:8161 -p 61646:61616 -v /root/activemq/activemq.borkerhub1.xml:/opt/activemq/conf/activemq.xml --name zqqactivemq4 zqqactivemq  
+ docker run -d -it -p 8165:8161 -p 61656:61616 -v /root/activemq/activemq.borkerhub2.xml:/opt/activemq/conf/activemq.xml --name zqqactivemq5 zqqactivemq 
+ for ss in 1 2 3 4 5
+ do
+ docker stop zqqactivemq$ss;
+ docker rm zqqactivemq$ss;
+ done
+ 网页测试均可显示各自的borkername
+ 程序测试，java代码，见文件夹activemqpubsubcluster
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

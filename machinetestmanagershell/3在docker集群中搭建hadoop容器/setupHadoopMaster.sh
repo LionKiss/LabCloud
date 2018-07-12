@@ -70,7 +70,7 @@ function setupHadoopMaster(){
 }
 function init_hadoop(){
 	#in /usr/local/hadoop/etc/hadoop dir
-	#edit five xml core-site.xml°¢hdfs-site.xml°¢yarn-site.xml°¢mapred-site.xml
+	#edit five xml core-site.xml„ÄÅhdfs-site.xml„ÄÅyarn-site.xml„ÄÅmapred-site.xml
 	#(1)hadoop-env.sh
 	#export JAVA_HOME=/usr/local/jdk
 	sed -i 's/export JAVA_HOME=.*/export JAVA_HOME=\/usr\/local\/jdk/' /usr/local/hadoop/etc/hadoop/hadoop-env.sh
@@ -91,7 +91,7 @@ function init_hadoop(){
 	mv /usr/local/hadoop/etc/hadoop/mapred-site.xml.template /usr/local/hadoop/etc/hadoop/mapred-site.xml
 	sed -i 's/<configuration>/&\n<property>\n<name>mapreduce.framework.name<\/name>\n<value>yarn<\/value>\n<\/property>\n/' /usr/local/hadoop/etc/hadoop/mapred-site.xml
 
-	#(9)setting nodemanager address£¨edit yarn-site.xml
+	#(9)setting nodemanager addressÔºåedit yarn-site.xml
 	sed -i 's/<configuration>/&\n<property>\n<description>The hostname of the RM.<\/description>\n<name>yarn.resourcemanager.hostname<\/name>\n<value>hadoop0<\/value>\n<\/property>\n/' /usr/local/hadoop/etc/hadoop/yarn-site.xml
 	
 }

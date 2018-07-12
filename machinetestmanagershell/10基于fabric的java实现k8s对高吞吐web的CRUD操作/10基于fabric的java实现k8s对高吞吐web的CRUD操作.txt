@@ -1,0 +1,168 @@
+基于fabric的java实现kubernetes的二次开发
+1，相关jar包下载，mvnjar、maven仓库中即可下载
+fabric-utils-2.0.47.jar
+httpclient-4.3.6-sources.jar
+httpclient-4.3.6.jar
+jackson-annotations-2.9.6.jar
+jackson-core-2.9.6.jar
+jackson-databind-2.9.6.jar
+jackson-dataformat-yaml-2.9.5.jar
+kubernetes-client-3.2.0-sources.jar
+kubernetes-client-3.2.0.jar
+kubernetes-model-2.1.1-sources.jar
+kubernetes-model-2.1.1.jar
+log4j-1.2.14.jar
+log4j-over-slf4j-1.7.25.jar
+logging-interceptor-3.10.0.jar
+okhttp-3.10.0.jar
+okio-1.13.0.jar
+slf4j-api-1.7.25.jar
+slf4j-jdk14-1.7.25.jar
+#rc创建和删除对应下面两个jar包
+validation-api-1.1.0.Final.jar 注意版本2点多的不支持
+zjsonpatch-0.3.0.jar
+2，获取kubernetes客户端
+Config config = new ConfigBuilder().withMasterUrl("http://xxx.xx.xx.xx:8080/").build();
+KubernetesClient client = new DefaultKubernetesClient(config); 
+3，结合终端操作kubernetes的相关kubectl命令，实现相关查询、条件查询、删除等操作
+Nodes
+Namespaces
+Services
+Replicationcontrollers
+Pods
+Events
+Resourcequotas
+详细代码见/kubernetes1/src/kubernetestest01/kubernetes*.java
+4，创建操作，主要是pod、ReplicationController、service
+准备工作；
+下载四个镜像，注意这里最好是Tomcat8.5以上，7版本及以前版本经测试不合适
+  docker pull docker.io/mysql		
+	docker pull docker.io/tomcat
+	docker pull docker.io/redis
+	docker pull docker.io/nginx
+  
+  注意使用K8S需要将镜像上传至私有镜像仓库
+  docker tag docker.io/mysql:latest	node0:5000/mysql:latest
+  docker tag docker.io/tomcat:latest node0:5000/tomcat:latest
+  docker tag docker.io/redis:latest	node0:5000/redis:latest
+  docker tag docker.io/nginx:latest	node0:5000/nginx:latest
+  docker push node0:5000/tomcat:latest
+	docker push node0:5000/tomcat:latest
+	docker push node0:5000/redis:latest
+	docker push node0:5000/nginx:latest
+  注意K8S的映射端口范围是：30000-32767
+  代码测试
+  /kubernetes1/src/podSvcRcContro/test1svcrc*.java
+  四个文件分别对创建mysql、nginx、Tomcat、redis进行了测试，采用ReplicationController内置一个pod，以service作为服务暴露，用的nodePort类型
+  注意，特别注意，这里有一个坑。如果你遇到这种情况：就是只能在服务所发布的节点访问，不能在其他节点和外部机器上访问，百分之99的可能就是flannel.1启动的iptables规则服务没有转发规则
+  解决办法
+  iptables -A FORWARD -s 0.0.0.0/0 -j ACCEPT
+  iptables -A FORWARD -s 172.16.0.0/16 -j ACCEPT
+  iptables -A FORWARD -s 192.168.0.0/16 -j ACCEPT
+  其中172.16.0.0/16是我节点的ip段，192.168.0.0/16是我的docker以及flannel.1的ip段，共参考
+4.2 参考文件5NginxTomcatRedisWeb示例生成相应的镜像文件，部署高吞吐web
+
+部署mysql,建议采用5.7版本了或者一下的，不然，不能将my.cnf替换到/etc/mysql/my.cnf
+cat > Dockerfile <<EOF
+FROM docker.io/mysql:5.7
+ENV MYSQL_ALLOW_EMPTY_PASSWORD yes
+COPY setup.sh /mysql/setup.sh
+COPY schema.sql /mysql/schema.sql
+COPY privileges.sql /mysql/privileges.sql
+COPY my.cnf /etc/mysql/my.cnf
+CMD ["sh", "/mysql/setup.sh"]
+EOF
+
+将所需的四个文件一起拷贝到与Dockerfile同级目录下
+docker build -t ntrmmysql:1 .
+提交到镜像cangku
+docker tag ntrmmysql:1 node0:5000/ntrmmysql:1
+docker push node0:5000/ntrmmysql:1
+docker rmi ntrmmysql:1
+下面是测试
+docker stop ntrmmysql
+docker rm ntrmmysql
+docker run -d -p 13306:3306 -e MYSQL_ROOT_PASSWORD=123 --name ntrmmysql ntrmmysql:1
+docker exec -it  ntrmmysql  /bin/bash
+这是授权，我再privileges.sql中写了，不知为何没有执行？
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123' WITH GRANT OPTION;
+FLUSH   PRIVILEGES;
+部署redis
+redis这里由于项目中没有用到redis，redis只是作为Tomcat中session共享
+部署Tomcat
+创建Tomcat1 ntrmtomcat1:30612 和Tomcat2 ntrmtomcat2:30613,注意修改context.xml文件
+<Valve className="com.orangefunction.tomcat.redissessions.RedisSessionHandlerValve" />
+        <Manager className="com.orangefunction.tomcat.redissessions.RedisSessionManager"
+                   host="ntrmredis"
+                   port="30611"
+                   database="0" 
+                   maxInactiveInterval="60" />
+
+先查看Tomcat的版本，不要再踩mysql版本太高的坑，或从docker hub上查，latest版本是多少
+docker stop ntomcatrwm1
+docker rm ntomcatrwm1
+docker run -d -p 8180:8080 --name ntomcatrwm1 node0:5000/tomcat:latest
+docker exec -it ntomcatrwm1 /bin/bash 
+进入Tomcat的bin目录
+./catalina.sh version 
+mkdir tomcat
+cd tomcat
+cat > Dockerfile << EOF
+FROM docker.io/tomcat:8.5.20
+MAINTAINER zqq/819789214@qq.com
+COPY cyclingbgtv1.war  /usr/local/tomcat/webapps/
+COPY context.xml /usr/local/tomcat/conf/
+COPY commons-pool2-2.4.2.jar /usr/local/tomcat/lib/
+COPY jedis-2.9.0.jar /usr/local/tomcat/lib/
+COPY tomcat85-session-redis-1.0.jar /usr/local/tomcat/lib/
+EXPOSE 8080
+EOF
+
+docker build -t ntrmtomcat:1 .
+先用docker测试一下
+docker stop ntomcatrwm1
+docker rm ntomcatrwm1
+docker run -d -p 8180:8080 --name ntomcatrwm1 ntrmtomcat:1
+这里说明一下，docker运行的容器与kubernetes创建的容器，属于不同命名空间，即资源不会共享，因为项目中用到redis、mysql这些是k8s创建的，所以访问时可能只是Tomcat的欢迎页面，项目不能访问
+docker tag ntrmtomcat:1 node0:5000/ntrmtomcat:1
+docker push node0:5000/ntrmtomcat:1
+利用代码创建部署即可
+查看日志
+kubectl get pods
+kubectl logs -f ntrmtomcat-7xtvc
+
+部署nginx
+在nginx.conf
+#gzip  on;
+upstream cyclingbgtv1 {
+    server 172.16.2.123:30612;
+    server 172.16.2.123:30613;
+}
+proxy_pass  http://cyclingbgtv1;
+
+cat  > Dockerfile <<EOF
+FROM nginx
+MAINTAINER zqq/819789214@qq.com
+COPY  nginx.conf  /etc/nginx/
+EXPOSE 8080
+EOF
+
+docker build -t ntrmnginx:1 .
+docker tag ntrmnginx:1 node0:5000/ntrmnginx:1
+docker push node0:5000/ntrmnginx:1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  

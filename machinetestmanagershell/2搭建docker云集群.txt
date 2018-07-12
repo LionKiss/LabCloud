@@ -1,7 +1,7 @@
 1，复制dockercloud.js文件，修改里面的参数
    这两个集合默认第一个分别为：master节点的：主机IP以及主机名
    machines：为主机各个节点的IP集合，这个得手动收集
-   物理机填写方式{"IP":"172.16.2.133", "isMaster":true, "isPhysical": true, "MAC":"E0CB4EC8CF2E"}
+   物理机填写方式{"IP":"172.16.2.133", "isMaster":true, "isPhysical": true, "MAC":"*****"}
    虚拟机填写方式{"IP":"172.16.2.1", "isMaster":true, "path":"E:\\VirtualMachines\\docker1\\docker1.vmx"}
    isMaster：是否为主节点
    isPhysical：是否为物理机
@@ -32,9 +32,12 @@
    pwd为系统的虚拟机的源开机密码，这里推荐使用同一个开机密码
    
 	  localHOSTS:localHOSTS, 										向本地hosts文件中追加虚拟机的主机名与IP地址映射   
-	  setupIPhostname:setupIPhostname, 								设置虚拟机的IP与主机名映射，以及主机名
+	  setupIPhostname:setupIPhostname, 								设置集群的IP与主机名映射，以及主机名
 	  restartAllVirtualMachines:restartAllVirtualMachines, 			重启所有虚拟机
-	  runningState:runningState,									查看虚拟机的状态
+      clusterOff:clusterOff,                                        关闭集群中的真机
+      clusterOn:clusterOn,                                          开启集群中的真机
+      clusterReboot:clusterReboot,                                  重启集群中的真机
+	  runningState:runningState,									查看集群机器运行的状态
 	  common_init_MsaterSalve:common_init_MsaterSalve,				主节点和从节点中etcd、kubernetes、flannel共同的配置
 	  only_init_master:only_init_master,							主节点的单独需要的配置
 	  only_init_salve:only_init_salve,								从节点的单独需要的配置
@@ -42,8 +45,8 @@
 	  registry_init_update:registry_init_update,					registry节点建立镜像库
 	  dashboard_skydns_kubedns:dashboard_skydns_kubedns,			部署dashboard_skydns_kubedns
 	  One_button_loader:One_button_loader, 							执行以上函数，实现一键式装机（前提是：关闭了防火墙、selinux、更新了yum源）
-	  testcheshi1:testcheshi1,			
-	  测试函数
+	  testcheshi1:testcheshi1,			                            测试函数
+	  
 	  
 	  
 	  

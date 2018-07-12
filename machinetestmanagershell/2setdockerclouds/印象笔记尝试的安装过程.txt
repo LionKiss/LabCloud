@@ -1,0 +1,553 @@
+1，将主机与IP地址写入hosts文件夹中，master与salve都需要
+master etcd registry 是指向主节点IP地址 也就是说配置三项或者一项都可
+172.16.2.14   node1 master
+172.16.2.156 node2 node
+172.16.2.127 node3 node
+
+echo '172.16.2.14   node1
+172.16.2.156 node2
+172.16.2.127 node3' >> /etc/hosts
+
+2，关闭防火墙
+systemctl disable firewalld.service
+systemctl stop firewalld.service
+3，部署etcd服务 k8s的的依赖  这里etcd安装在主节点上？？？？？
+yum install etcd -y
+编辑 /etc/etcd/etcd.conf 文件
+sed -i 's/原字符串/新字符串/' /home/1.txt
+关于etcd监听的2379或者4001端口，都行，官方建议2379
+这里的0.0.0.0代表的任意几点的IP地址？？？？？？
+#sed -i 's/ETCD_NAME=default/ETCD_NAME=node1/' /etc/etcd/etcd.conf
+sed -i 's/ETCD_LISTEN_CLIENT_URLS="http:\/\/.*:2379"/ETCD_LISTEN_CLIENT_URLS="http:\/\/0.0.0.0:2379"/;s/ETCD_ADVERTISE_CLIENT_URLS="http:\/\/.*:2379"/ETCD_ADVERTISE_CLIENT_URLS="http:\/\/0.0.0.0:2379"/' /etc/etcd/etcd.conf
+启动并验证状态
+systemctl start etcd
+etcdctl set testdir/testkey0 0
+etcdctl get testdir/testkey0
+etcdctl -C http://node1:2379 cluster-health
+----member 8e9e05c52164694d is healthy: got healthy result from http://0.0.0.0:2379
+cluster is healthy
+
+3，安装master节点
+3.1，Docker安装
+配置镜像路径
+cat > /etc/yum.repos.d/virt7-docker-common-release.repo << EOF
+[virt7-docker-common-release]
+name=virt7-docker-common-release
+baseurl=http://cbs.centos.org/repos/virt7-docker-common-release/x86_64/os/
+gpgcheck=0
+EOF
+链接网络
+yum -y install --enablerepo=virt7-docker-common-release kubernetes flannel
+配置registry镜像库，表示可以从节点上拉取镜像 即为registry节点
+编辑/etc/sysconfig/docker文件 
+sed -i 's/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false.*\x27/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false --registry-mirror=https:\/\/wzmto2ol.mirror.aliyuncs.com --insecure-registry node2:5000 --add-registry node2:5000\x27/' /etc/sysconfig/docker
+
+设置开机自启动并开启服务
+chkconfig docker on
+service docker start
+
+3.2，安装kubernetes：
+master节点需要运行Kubernets API Server，Kubernets Controller Manager，Kubernets Scheduler组件
+配置Kubernets API Server
+编辑/etc/kubernetes/apiserver
+？？：NamespaceLifecycle,NamespaceExists,LimitRanger,SecurityContextDeny,ServiceAccount,ResourceQuota
+ sed -i 's/KUBE_API_ADDRESS="--insecure-bind-address=.*"/KUBE_API_ADDRESS="--insecure-bind-address=0.0.0.0"/;s/KUBE_ETCD_SERVERS="--etcd-servers=http:\/\/.*:2379"/KUBE_ETCD_SERVERS="--etcd-servers=http:\/\/node1:2379"/' /etc/kubernetes/apiserver
+
+ #去掉权限检查以免unable to create pods: No API token found for service account "default"
+ sed -i 's/KUBE_ADMISSION_CONTROL=.*/KUBE_ADMISSION_CONTROL="--admission-control=NamespaceLifecycle,NamespaceExists,LimitRanger,ResourceQuota"/' /etc/kubernetes/apiserver
+
+编辑 /etc/kubernetes/config
+sed -i 's/KUBE_MASTER="--master=http:\/\/.*:8080"/KUBE_MASTER="--master=http:\/\/node1:8080"/' /etc/kubernetes/config
+
+注意：主节点也要编辑 /etc/kubernetes/kubelet 不然启动的时候是 127.0.0.1 不是主节点的名称
+sed -i 's/KUBELET_ADDRESS="--address=.*"/KUBELET_ADDRESS="--address=0.0.0.0"/;s/KUBELET_HOSTNAME="--hostname-override=.*"/KUBELET_HOSTNAME="--hostname-override=node1"/;s/KUBELET_API_SERVER="--api-servers=http:\/\/.*:8080"/KUBELET_API_SERVER="--api-servers=http:\/\/node1:8080"/;s/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=.*"/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=node2:5000\/pod-infrastructure"/;s/KUBELET_ARGS=.*/KUBELET_ARGS="--cluster-dns=10.254.10.2 --cluster-domain=hi --allow-privileged=true"/' /etc/kubernetes/kubelet
+
+
+启动服务并设置开机自启动
+systemctl enable kube-apiserver.service
+systemctl start kube-apiserver.service
+systemctl enable kube-controller-manager.service
+systemctl start kube-controller-manager.service
+systemctl enable kube-scheduler.service
+systemctl start kube-scheduler.service
+
+4，部署salve节点
+4.1， 安装docker  注意注意：这里也要修改配置文件/etc/sysconfig/docker
+4.2 ，安装kubernetes
+4.3 ，配置并启动kubernetes
+在salve节点上需要运行以下两个组件 Kubelet ， Kubernets Proxy
+4.3.1 /etc/kubernetes/config
+sed -i 's/KUBE_MASTER="--master=http:\/\/.*:8080"/KUBE_MASTER="--master=http:\/\/node1:8080"/' /etc/kubernetes/config
+
+编辑 /etc/kubernetes/kubelet
+注意这里的node2为从节点的主机名  需更换，node1为master节点 ，第二node1为自身镜像资源库节点
+  sed -i 's/KUBELET_ADDRESS="--address=.*"/KUBELET_ADDRESS="--address=0.0.0.0"/;s/KUBELET_HOSTNAME="--hostname-override=.*"/KUBELET_HOSTNAME="--hostname-override=node2"/;s/KUBELET_API_SERVER="--api-servers=http:\/\/.*:8080"/KUBELET_API_SERVER="--api-servers=http:\/\/node1:8080"/;s/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=.*"/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=node2:5000\/pod-infrastructure"/;s/KUBELET_ARGS=.*/KUBELET_ARGS="--cluster-dns=10.254.10.2 --cluster-domain=hi --allow-privileged=true"/' /etc/kubernetes/kubelet
+  sed -i 's/KUBELET_ADDRESS="--address=.*"/KUBELET_ADDRESS="--address=0.0.0.0"/;s/KUBELET_HOSTNAME="--hostname-override=.*"/KUBELET_HOSTNAME="--hostname-override=node3"/;s/KUBELET_API_SERVER="--api-servers=http:\/\/.*:8080"/KUBELET_API_SERVER="--api-servers=http:\/\/node1:8080"/;s/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=.*"/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=node2:5000\/pod-infrastructure"/;s/KUBELET_ARGS=.*/KUBELET_ARGS="--cluster-dns=10.254.10.2 --cluster-domain=hi --allow-privileged=true"/' /etc/kubernetes/kubelet
+
+  
+
+启动服务并设置开机自启动
+systemctl enable kubelet.service
+systemctl start kubelet.service
+systemctl enable kube-proxy.service
+systemctl start kube-proxy.service
+
+验证结果
+[root@node1 ~]# kubectl -s http://node1:8080 get node
+NAME      STATUS    AGE
+node2   Ready     24s
+node3   Ready     23s
+
+[root@node1 ~]# kubectl get nodes
+NAME      STATUS    AGE
+node2   Ready     1m
+node3   Ready     1m
+
+5，创建覆盖网络--Flannel
+Flannel一个网络管理工具，在master节点与slave节点中都需安装
+
+yum install flannel
+master、node上均编辑/etc/sysconfig/flanneld
+这里的node1为etcd服务的节点的主机名
+  sed -i 's/FLANNEL_ETCD_ENDPOINTS="http:\/\/.*:2379"/FLANNEL_ETCD_ENDPOINTS="http:\/\/node1:2379"/;s/FLANNEL_ETCD_PREFIX=".*"/FLANNEL_ETCD_PREFIX="\/kube-centos\/network"/' /etc/sysconfig/flanneld
+
+在master节点中配置上文FLANNEL_ETCD_PREFIX对应文件/kube-centos/network的值
+etcdctl mkdir /kube-centos/network
+etcdctl mk /kube-centos/network/config "{ \"Network\": \"192.168.0.0/16\", \"SubnetLen\": 24, \"Backend\": { \"Type\": \"vxlan\" } }"
+
+6 部署kubernetes-dashboard.yaml：一个容器里面的是一个网站，用来显示集群部署环境，也是使用的集群的ui接口
+
+
+http://172.16.2.14:5000/v2/_catalog 显示的自己私有镜像库的列表，即配置的registry节点地址
+六个镜像下载地址
+registry:2
+直接pull下来，运行
+docker pull registry:2
+docker run -d -p 5000:5000 --restart=always --name registry  registry:2
+浏览器访问http://172.16.2.14:5000/v2/_catalog 显示的自己私有镜像库的列表，又可能是空，但只要不报错就行
+
+部署dashboard，将下面的两个链接直接pull下来
+registry.access.redhat.com/rhel7/pod-infrastructure
+docker.io/mritd/kubernetes-dashboard-amd64 
+docker pull registry.access.redhat.com/rhel7/pod-infrastructure
+docker pull docker.io/mritd/kubernetes-dashboard-amd64 
+使用tag创建新的名称并上传到自己的镜像库，便于kubernetes-dashboard.yaml下载
+docker tag registry.access.redhat.com/rhel7/pod-infrastructure  pod-infrastructure:latest
+docker tag  docker.io/mritd/kubernetes-dashboard-amd64  kubernetes-dashboard-amd64:latest
+docker push pod-infrastructure
+docker push kubernetes-dashboard-amd64
+
+部署dns方式重复部署dashboard的pull 、tag、push 步骤
+docker.io/ist0ne/kubedns-amd64 
+docker pull docker.io/ist0ne/kubedns-amd64 
+docker tag  docker.io/ist0ne/kubedns-amd64 kubedns-amd64:latest
+docker push kubedns-amd64
+docker.io/ist0ne/kube-dnsmasq-amd64 
+docker pull docker.io/ist0ne/kube-dnsmasq-amd64
+docker tag docker.io/ist0ne/kube-dnsmasq-amd64 kube-dnsmasq-amd64:latest
+docker push kube-dnsmasq-amd64
+docker.io/ist0ne/exechealthz-amd64 
+docker pull docker.io/ist0ne/exechealthz-amd64 
+docker tag docker.io/ist0ne/exechealthz-amd64 exechealthz-amd64:latest
+docker push exechealthz-amd64
+
+将initK8S()函数粘贴至界面，输入 initK8S命令调用即可
+
+
+function closeFireWall(){
+  setenforce 0
+  systemctl disable iptables-services firewalld
+  systemctl stop iptables-services firewalld
+}
+function startMasterSoftware(){
+  for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler flanneld; do
+      systemctl restart $SERVICES
+      systemctl enable $SERVICES
+      systemctl status $SERVICES
+  done
+}
+function startSlaveSoftware(){
+  for SERVICES in kube-proxy kubelet flanneld docker; do
+    systemctl restart $SERVICES
+    systemctl enable $SERVICES
+    systemctl status $SERVICES
+  done
+}
+function startMaster(){
+  closeFireWall
+  startMasterSoftware
+  startSlaveSoftware
+}
+function startSlave(){
+  closeFireWall
+  startSlaveSoftware
+}
+
+主节点输入startMaster
+从节点输入startSlave
+
+
+输入
+kubectl get pods --all-namespaces
+kubectl describe pods/`kubectl get pods --all-namespaces | tail -n 1 | awk '{print $2}'` --namespace="kube-system"
+kubectl logs `kubectl get pods --all-namespaces | tail -n 1 | awk '{print $2}'` --namespace="kube-system"
+无error即可,，成功访问 http://172.16.2.14:8080/ui/
+
+注意：这里的IP地址（172.16.2.14）和主机名（node1）更换为自己的IP与主机名  还要主要image的镜像地址值
+function initK8S(){
+  #dashboard
+  cat > kubernetes-dashboard.yaml << EOF
+# Configuration to deploy release version of the Dashboard UI.  
+#  
+# Example usage: kubectl create -f <this_file>  
+  
+kind: Deployment  
+apiVersion: extensions/v1beta1  
+metadata:  
+  labels:  
+    app: kubernetes-dashboard  
+    version: v1.1.0  
+  name: kubernetes-dashboard  
+  namespace: kube-system
+spec:  
+  replicas: 1  
+  selector:  
+    matchLabels:  
+      app: kubernetes-dashboard  
+  template:  
+    metadata:  
+      labels:  
+        app: kubernetes-dashboard  
+    spec:  
+      containers:  
+      - name: kubernetes-dashboard  
+        #主节点的主机名修改
+        image: node1:5000/kubernetes-dashboard-amd64  
+        imagePullPolicy: Always  
+        ports:  
+        - containerPort: 9090  
+          protocol: TCP  
+        args:  
+          # Uncomment the following line to manually specify Kubernetes API server Host  
+          # If not specified, Dashboard will attempt to auto discover the API server and connect  
+          # to it. Uncomment only if the default does not work.  
+          #主节点IP修改
+          - --apiserver-host=http://172.16.2.14:8080
+        livenessProbe:  
+          httpGet:  
+            path: /  
+            port: 9090  
+          initialDelaySeconds: 30  
+          timeoutSeconds: 30  
+---  
+kind: Service  
+apiVersion: v1  
+metadata:  
+  labels:  
+    app: kubernetes-dashboard  
+  name: kubernetes-dashboard  
+  namespace: kube-system  
+spec:  
+  type: NodePort  
+  ports:  
+  - port: 80  
+    targetPort: 9090  
+  selector:  
+    app: kubernetes-dashboard
+EOF
+  kubectl delete -f kubernetes-dashboard.yaml
+  kubectl create -f kubernetes-dashboard.yaml
+  kubectl get pods --all-namespaces
+  kubectl describe pods/`kubectl get pods --all-namespaces | tail -n 1 | awk '{print $2}'` --namespace="kube-system"
+  kubectl logs `kubectl get pods --all-namespaces | tail -n 1 | awk '{print $2}'` --namespace="kube-system"
+  kubectl describe service/kubernetes-dashboard --namespace="kube-system"
+
+  kubectl describe pods/`kubectl get pods --all-namespaces | grep 'kube-dns-v9' | tail -n 1 | awk '{print $2}'` --namespace="kube-system"
+  kubectl logs `kubectl get pods --all-namespaces | grep 'kube-dns-v9' | tail -n 1 | awk '{print $2}'` --namespace="kube-system"
+  
+cat > skydns-rc.yaml << EOF
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kube-dns-v9
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+    version: v9
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: kube-dns
+    version: v9
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-dns
+        version: v9
+        kubernetes.io/cluster-service: "true"
+    spec:
+      containers:
+      - name: etcd
+        image: etcd
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+        command:
+        - /usr/local/bin/etcd
+        - -data-dir
+        - /var/etcd/data
+        - -listen-client-urls
+        - http://127.0.0.1:2379,http://127.0.0.1:4001
+        - -advertise-client-urls
+        - http://127.0.0.1:2379,http://127.0.0.1:4001
+        - -initial-cluster-token
+        - skydns-etcd
+        volumeMounts:
+        - name: etcd-storage
+          mountPath: /var/etcd/data
+      - name: kube2sky
+        image: kube2sky
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+        args:
+        - -domain=cluster.local
+        #主节点IP修改
+        - -kube_master_url=http://172.16.2.14:8080
+      - name: skydns
+        image: skydns
+        resources:
+          limits:
+            cpu: 100m
+            memory: 50Mi
+        args:
+        - -machines=http://localhost:4001
+        - -addr=0.0.0.0:53
+        - -domain=cluster.local
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+      volumes:
+      - name: etcd-storage
+        emptyDir: {}
+EOF
+  cat > skydns-svc.yaml << EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "KubeDNS"
+spec:
+  selector:
+    k8s-app: kube-dns
+  clusterIP: 10.254.0.3
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+EOF
+
+  cat > kube-dns_14.yaml << EOF
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kube-dns-v20
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+    version: v20
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: 1
+  selector:
+    k8s-app: kube-dns
+    version: v20
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-dns
+        version: v20
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        scheduler.alpha.kubernetes.io/tolerations: '[{"key":"CriticalAddonsOnly", "operator":"Exists"}]'
+    spec:
+      containers:
+      - name: kubedns
+        image: kubedns-amd64
+        imagePullPolicy: IfNotPresent
+        resources:
+          # TODO: Set memory limits when we've profiled the container for large
+          # clusters, then set request = limit to keep this container in
+          # guaranteed class. Currently, this container falls into the
+          # "burstable" category so the kubelet doesn't backoff from restarting it.
+          limits:
+            memory: 170Mi
+          requests:
+            cpu: 100m
+            memory: 70Mi
+        livenessProbe:
+          httpGet:
+            path: /healthz-kubedns
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8081
+            scheme: HTTP
+          # we poll on pod startup for the Kubernetes master service and
+          # only setup the /readiness HTTP server once that's available.
+          initialDelaySeconds: 3
+          timeoutSeconds: 5
+        args:
+        # command = "/kube-dns"
+        - --domain=hi
+        - --dns-port=10053
+        #主节点IP修改
+        - --kube-master-url=http://172.16.2.14:8080
+        ports:
+        - containerPort: 10053
+          name: dns-local
+          protocol: UDP
+        - containerPort: 10053
+          name: dns-tcp-local
+          protocol: TCP
+      - name: dnsmasq
+        image: kube-dnsmasq-amd64
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz-dnsmasq
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 60
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        args:
+        - --cache-size=1000
+        - --no-resolv
+        - --server=127.0.0.1#10053
+        - --log-facility=-
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+      - name: healthz
+        image: exechealthz-amd64
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: 50Mi
+          requests:
+            cpu: 10m
+            # Note that this container shouldn't really need 50Mi of memory. The
+            # limits are set higher than expected pending investigation on #29688.
+            # The extra memory was stolen from the kubedns container to keep the
+            # net memory requested by the pod constant.
+            memory: 50Mi
+        args:
+        - --cmd=nslookup kubernetes.default.svc.hi 127.0.0.1 >/dev/null
+        - --url=/healthz-dnsmasq
+        - --cmd=nslookup kubernetes.default.svc.hi 127.0.0.1:10053 >/dev/null
+        - --url=/healthz-kubedns
+        - --port=8080
+        - --quiet
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+      dnsPolicy: Default  # Don't use cluster DNS.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+    kubernetes.io/cluster-service: "true"
+    kubernetes.io/name: "KubeDNS"
+spec:
+  type: NodePort  
+  selector:
+    k8s-app: kube-dns
+  clusterIP: 10.254.10.2
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+EOF
+
+  #skydns-rc skydns-svc
+  for SERVICES in kube-dns_14; do
+    kubectl delete -f $SERVICES.yaml
+    kubectl create -f $SERVICES.yaml  
+    #kubectl apply -f nginx.yaml
+    #kubectl describe pods/nginx
+  done
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

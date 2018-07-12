@@ -1,16 +1,14 @@
 # !/bin/bash
-#Ğ£Ô°ÍøµÇÂ½£¬Ãô¸ĞĞÅÏ¢
+#æ ¡å›­ç½‘ç™»é™†ï¼Œæ•æ„Ÿä¿¡æ¯
 function connect(){
   #connect internet
-  curl "http://202.193.80.124/" -H "Pragma: no-cache" -H "Origin: http://202.193.80.124" -H "Accept-Encoding: gzip, deflate" -H "Accept-Language: zh-CN,zh;q=0.8" -H "Upgrade-Insecure-Requests: 1" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" -H "Cache-Control: max-age=0" -H "Referer: http://202.193.80.124/" -H "Connection: keep-alive" --data "DDDDD=g102016452&upass=03141b2b5032ba8c682103364b93ce2a123456781&R1=0&R2=1&para=00&0MKKey=123456" --compressed | grep "Please don't forget to log out after you have finished."
 }
 function disconnect(){
   #disconnect internet
-  curl "http://202.193.80.124/F.htm" -H "Accept-Encoding: gzip, deflate, sdch" -H "Accept-Language: zh-CN,zh;q=0.8" -H "Upgrade-Insecure-Requests: 1" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" -H "Referer: http://202.193.80.124/" -H "Connection: keep-alive" --compressed >/dev/null 2>&1
 }
 
-#ÕâÀï¿ÉÒÔÍ¨¹ıĞÂ½¨ÎÄ¼ş¼ĞµÄ·½Ê½£¬½«×ÊÔ´·ÅÖÃµ½ÍøÂçÉÏ£¬ÀûÓÃwgetÃüÁî½«ÆäÏÂÔØ
-#ÕâÀïÔİÊ±Ê¹ÓÃSecureCRTÉÏ´«
+#è¿™é‡Œå¯ä»¥é€šè¿‡æ–°å»ºæ–‡ä»¶å¤¹çš„æ–¹å¼ï¼Œå°†èµ„æºæ”¾ç½®åˆ°ç½‘ç»œä¸Šï¼Œåˆ©ç”¨wgetå‘½ä»¤å°†å…¶ä¸‹è½½
+#è¿™é‡Œæš‚æ—¶ä½¿ç”¨SecureCRTä¸Šä¼ 
 #connect
 #yum --enablerepo=base clean metadata
 #connect
@@ -32,7 +30,7 @@ docker pull registry.cn-hangzhou.aliyuncs.com/repos_zyl/centos:0.0.1
 yum update
 connect
 
-#±à¼­Dockerfile
+#ç¼–è¾‘Dockerfile
 cd $HadoopJdkDockerfile
 cat > Dockerfile <<EOF
 #build Dockerfile  produce hadoop basic image
@@ -41,7 +39,7 @@ cat > Dockerfile <<EOF
 FROM registry.cn-hangzhou.aliyuncs.com/repos_zyl/centos:0.0.1
 # images  author
 MAINTAINER zqq/819789214@qq.com
-# install openssh-server sudo £¬and sshd install UsePAM install no
+# install openssh-server sudo ï¼Œand sshd install UsePAM install no
 RUN yum install -y openssh-server
 #RUN sed -i 's/UsePAM yes/UsePAM no/g' /etc/ssh/sshd_config
 #install openssh-clients
@@ -50,7 +48,7 @@ RUN yum install -y openssl
 #install which for hdfs format
 RUN yum install -y which
 RUN yum install -y expect
-# add user £ºroot£¬pwd:hadoop£¬adn add in sudoers  
+# add user ï¼šrootï¼Œpwd:hadoopï¼Œadn add in sudoers  
 RUN echo "root:$hadoopPwd" | chpasswd
 RUN echo "root   ALL=(ALL)       ALL" >> /etc/sudoers
 # under in centos6
@@ -95,17 +93,17 @@ build_hadoop
 #hadoopsum=3
 function stable_ip(){
 connect
-#°²×°gitÃüÁî´ÓGitHubÉÏÏÂÔØpipework  ÏÂÔØµØÖ·£ºhttps://github.com/jpetazzo/pipework.git
+#å®‰è£…gitå‘½ä»¤ä»GitHubä¸Šä¸‹è½½pipework  ä¸‹è½½åœ°å€ï¼šhttps://github.com/jpetazzo/pipework.git
 yum install -y git
 cd ~
 rm -rf /root/pipework
 rm -rf /usr/local/bin/pipework
 git clone https://github.com/jpetazzo/pipework.git
 cp -rp /root/pipework/pipework /usr/local/bin/
-#°²×°bridge-utils
+#å®‰è£…bridge-utils
 connect
 yum -y install bridge-utils
-#4£º´´½¨ÍøÂç
+#4ï¼šåˆ›å»ºç½‘ç»œ
 ifconfig br0 down
 brctl delbr br0
 brctl addbr br0
@@ -117,11 +115,11 @@ stable_ip
 
 #hadoopsum=3
 function init_hadoop(){
-#1£º¼¯Èº¹æ»®
-#×¼±¸´î½¨Ò»¸ö¾ßÓĞÈı¸ö½ÚµãµÄ¼¯Èº£¬Ò»Ö÷Á½´Ó
-#Ö÷½Úµã£ºhadoop0 ip£º192.168.2.10
-#´Ó½Úµã1£ºhadoop1 ip£º192.168.2.11
-#´Ó½Úµã2£ºhadoop2 ip£º192.168.2.12
+#1ï¼šé›†ç¾¤è§„åˆ’
+#å‡†å¤‡æ­å»ºä¸€ä¸ªå…·æœ‰ä¸‰ä¸ªèŠ‚ç‚¹çš„é›†ç¾¤ï¼Œä¸€ä¸»ä¸¤ä»
+#ä¸»èŠ‚ç‚¹ï¼šhadoop0 ipï¼š192.168.2.10
+#ä»èŠ‚ç‚¹1ï¼šhadoop1 ipï¼š192.168.2.11
+#ä»èŠ‚ç‚¹2ï¼šhadoop2 ipï¼š192.168.2.12
 #for ((i=0;i<3;i++));
 for ((i=($hadoopsum-1);i>=0;i--));
 do
@@ -133,7 +131,7 @@ do
 	else 
 	docker run --name hadoop$i --hostname hadoop$i -d -P hadoop-jdk-ssh-root-test /bin/sh /root/shfile/setupHadoopSalve.sh;
 	fi 
-	#5£º¸øÈİÆ÷ÉèÖÃ¹Ì¶¨ip
+	#5ï¼šç»™å®¹å™¨è®¾ç½®å›ºå®šip
 	pipework br0 hadoop$i 192.168.2.1$i/24;
 done
 
@@ -146,7 +144,7 @@ init_hadoop
 
 
 function commithadoop(){
-#½«ÈİÆ÷Ìá½»±¸·İ
+#å°†å®¹å™¨æäº¤å¤‡ä»½
 for ((i=($hadoopsum-1);i>=0;i--));
 do
 docker commit hadoop$i finishhadoop$i;

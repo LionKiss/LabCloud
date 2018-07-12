@@ -6,18 +6,16 @@ apiserverHostname=
 etcdHostname=
 
 chmod +x common_init_MsaterSalve_tmp*
-#ÕâÀï×¼±¸Ð´¸ö½Å±¾ÎÄ¼þ£¬
+#è¿™é‡Œå‡†å¤‡å†™ä¸ªè„šæœ¬æ–‡ä»¶ï¼Œ
 function connect(){
   #connect internet
-  curl "http://202.193.80.124/" -H "Pragma: no-cache" -H "Origin: http://202.193.80.124" -H "Accept-Encoding: gzip, deflate" -H "Accept-Language: zh-CN,zh;q=0.8" -H "Upgrade-Insecure-Requests: 1" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36" -H "Content-Type: application/x-www-form-urlencoded" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" -H "Cache-Control: max-age=0" -H "Referer: http://202.193.80.124/" -H "Connection: keep-alive" --data "DDDDD=g102016452&upass=03141b2b5032ba8c682103364b93ce2a123456781&R1=0&R2=1&para=00&0MKKey=123456" --compressed | grep "Please don't forget to log out after you have finished."
 }
 function disconnect(){
   #disconnect internet
-  curl "http://202.193.80.124/F.htm" -H "Accept-Encoding: gzip, deflate, sdch" -H "Accept-Language: zh-CN,zh;q=0.8" -H "Upgrade-Insecure-Requests: 1" -H "User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8" -H "Referer: http://202.193.80.124/" -H "Connection: keep-alive" --compressed >/dev/null 2>&1
 }
 
 
-#¸üÐÂyumÔ´ 
+#æ›´æ–°yumæº 
 function yumupdate(){
 disconnect
 connect
@@ -28,7 +26,7 @@ yum install -y deltarpm
 yum provides '*/applydeltarpm'
 disconnect
 }
-#Ò»°ãyumÔ´ÔÚ»ù´¡¾µÏñÖÐÒÑ¾­¸üÐÂºÃÁËµÄ×îÐÂ°æ±¾£¬ÕâÀï¾Í²»¸üÐÂÁË
+#ä¸€èˆ¬yumæºåœ¨åŸºç¡€é•œåƒä¸­å·²ç»æ›´æ–°å¥½äº†çš„æœ€æ–°ç‰ˆæœ¬ï¼Œè¿™é‡Œå°±ä¸æ›´æ–°äº†
 #yumupdate
 
 
@@ -37,12 +35,12 @@ function init_edit_etcd.conf(){
 connect
 yum install -y etcd 
 disconnect
-sed -i 's/ETCD_NAME=default/ETCD_NAME='$hostname'/' /etc/etcd/etcd.conf
+#sed -i 's/ETCD_NAME=default/ETCD_NAME='$hostname'/' /etc/etcd/etcd.conf
 sed -i 's/ETCD_LISTEN_CLIENT_URLS="http:\/\/.*:2379"/ETCD_LISTEN_CLIENT_URLS="http:\/\/0.0.0.0:2379"/;s/ETCD_ADVERTISE_CLIENT_URLS="http:\/\/.*:2379"/ETCD_ADVERTISE_CLIENT_URLS="http:\/\/0.0.0.0:2379"/' /etc/etcd/etcd.conf
 }
 #install Docker
 function init_edit_docker(){
-#ÅäÖÃ¾µÏñÂ·¾¶
+#é…ç½®é•œåƒè·¯å¾„
 cat > /etc/yum.repos.d/virt7-docker-common-release.repo << EOF
 [virt7-docker-common-release]
 name=virt7-docker-common-release
@@ -50,35 +48,35 @@ baseurl=http://cbs.centos.org/repos/virt7-docker-common-release/x86_64/os/
 gpgcheck=0
 EOF
 connect
-#Docker°²×°
+#Dockerå®‰è£…
 yum -y install --enablerepo=virt7-docker-common-release kubernetes flannel
 disconnect
-#ÅäÖÃregistry¾µÏñ¿â£¬±íÊ¾¿ÉÒÔ´Ó½ÚµãÉÏÀ­È¡¾µÏñ ¼´Îªregistry½Úµã
-#±à¼­/etc/sysconfig/dockerÎÄ¼þ 
+#é…ç½®registryé•œåƒåº“ï¼Œè¡¨ç¤ºå¯ä»¥ä»ŽèŠ‚ç‚¹ä¸Šæ‹‰å–é•œåƒ å³ä¸ºregistryèŠ‚ç‚¹
+#ç¼–è¾‘/etc/sysconfig/dockeræ–‡ä»¶ 
 sed -i 's/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false.*\x27/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false --registry-mirror=https:\/\/wzmto2ol.mirror.aliyuncs.com --insecure-registry '$registryHostname':5000 --add-registry '$registryHostname':5000\x27/' /etc/sysconfig/docker
-#ÉèÖÃ¿ª»ú×ÔÆô¶¯²¢¿ªÆô·þÎñ
+#è®¾ç½®å¼€æœºè‡ªå¯åŠ¨å¹¶å¼€å¯æœåŠ¡
 systemctl enable docker
 systemctl start docker
 }
 #install kubernetes
-#ÅäÖÃ /etc/kubernetes/kubeletÎÄ¼þ
+#é…ç½® /etc/kubernetes/kubeletæ–‡ä»¶
 function init_edit_kubernetes(){
 connect
 #yum -y install kubernetes
 disconnect
-#×¢Òâ£ºÖ÷½ÚµãÒ²Òª±à¼­ /etc/kubernetes/kubelet ²»È»Æô¶¯µÄÊ±ºòÊÇ 127.0.0.1 ²»ÊÇÖ÷½ÚµãµÄÃû³Æ
+#æ³¨æ„ï¼šä¸»èŠ‚ç‚¹ä¹Ÿè¦ç¼–è¾‘ /etc/kubernetes/kubelet ä¸ç„¶å¯åŠ¨çš„æ—¶å€™æ˜¯ 127.0.0.1 ä¸æ˜¯ä¸»èŠ‚ç‚¹çš„åç§°
 sed -i 's/KUBELET_ADDRESS="--address=.*"/KUBELET_ADDRESS="--address=0.0.0.0"/;s/KUBELET_HOSTNAME="--hostname-override=.*"/KUBELET_HOSTNAME="--hostname-override='$hostname'"/;s/KUBELET_API_SERVER="--api-servers=http:\/\/.*:8080"/KUBELET_API_SERVER="--api-servers=http:\/\/'$apiserverHostname':8080"/;s/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=.*"/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image='$registryHostname':5000\/pod-infrastructure"/;s/KUBELET_ARGS=.*/KUBELET_ARGS="--cluster-dns=10.254.10.2 --cluster-domain=hi --allow-privileged=true"/' /etc/kubernetes/kubelet
 }
 #install Flannel
-#FlannelÒ»¸öÍøÂç¹ÜÀí¹¤¾ß£¬ÔÚmaster½ÚµãÓëslave½ÚµãÖÐ¶¼Ðè°²×°
+#Flannelä¸€ä¸ªç½‘ç»œç®¡ç†å·¥å…·ï¼Œåœ¨masterèŠ‚ç‚¹ä¸ŽslaveèŠ‚ç‚¹ä¸­éƒ½éœ€å®‰è£…
 function init_edit_flannel(){
 #yum install -y flannel
-#master¡¢nodeÉÏ¾ù±à¼­/etc/sysconfig/flanneld
-#ÕâÀïµÄdocker1Îªetcd·þÎñµÄ½ÚµãµÄÖ÷»úÃû
+#masterã€nodeä¸Šå‡ç¼–è¾‘/etc/sysconfig/flanneld
+#è¿™é‡Œçš„docker1ä¸ºetcdæœåŠ¡çš„èŠ‚ç‚¹çš„ä¸»æœºå
 sed -i 's/FLANNEL_ETCD_ENDPOINTS="http:\/\/.*:2379"/FLANNEL_ETCD_ENDPOINTS="http:\/\/'$etcdHostname':2379"/;s/FLANNEL_ETCD_PREFIX=".*"/FLANNEL_ETCD_PREFIX="\/kube-centos\/network"/' /etc/sysconfig/flanneld
-#ÔÚmaster½ÚµãÖÐÅäÖÃÉÏÎÄFLANNEL_ETCD_PREFIX¶ÔÓ¦ÎÄ¼þ/kube-centos/networkµÄÖµ ¼ûÏÂÎÄ
+#åœ¨masterèŠ‚ç‚¹ä¸­é…ç½®ä¸Šæ–‡FLANNEL_ETCD_PREFIXå¯¹åº”æ–‡ä»¶/kube-centos/networkçš„å€¼ è§ä¸‹æ–‡
 }
-init_edit_etcd.conf
 init_edit_docker
+init_edit_etcd.conf
 init_edit_kubernetes
 init_edit_flannel

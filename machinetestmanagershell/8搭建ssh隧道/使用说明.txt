@@ -1,0 +1,12 @@
+首先：在服务器端(linux)开启网关
+编辑sshd 的配置文件/etc/ssh/sshd_config，将GatewayPorts 开关打开：
+vi /etc/ssh/sshd_config
+GatewayPorts yes
+然后重启sshd：
+systemctl restart sshd
+
+2， 执行abc.bat文件，双击即可（里面东西可自动配置）
+
+3，即可链接可以
+
+如果是穿透windows,需在window中安装freesshd原件，并启动

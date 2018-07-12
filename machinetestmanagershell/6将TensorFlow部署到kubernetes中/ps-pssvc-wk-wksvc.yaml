@@ -1,0 +1,89 @@
+cat > ps-pssvc-wk-wksvc.yaml <<EOF
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: tensorflow-ps-rc
+spec:
+  replicas: 2
+  selector:
+    name: tensorflow-ps
+  template:
+    metadata:
+      labels:
+        name: tensorflow-ps
+        role: ps
+    spec:
+      containers:
+        - name: ps
+          image: $image_url
+          ports:
+           - containerPort: 32222
+          workingDir: /root/dataset/
+          volumeMounts:
+          - name: dataset
+            mountPath: /root/dataset/
+      nodeSelector: 
+        nodelist: distribute
+      volumes:
+      - name: dataset
+        hostPath:
+          path: /root/dataset/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: tensorflow-ps
+    role: service
+  name: tensorflow-ps-service
+spec:
+  ports:
+    - port: 32222
+      targetPort: 32222
+  selector:
+    name: tensorflow-ps
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: tensorflow-worker-rc
+spec:
+  replicas: 2
+  selector:
+    name: tensorflow-worker
+  template:
+    metadata:
+      labels:
+        name: tensorflow-worker
+        role: worker
+    spec:
+      containers:
+        - name: worker
+          image: $image_url
+          ports:
+           - containerPort: 32222
+          workingDir: /root/dataset/
+          volumeMounts:
+          - name: dataset
+            mountPath: /root/dataset/
+      nodeSelector: 
+        nodelist: distribute
+      volumes:
+      - name: dataset
+        hostPath:
+          path: /root/dataset/
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: tensorflow-worker
+    role: service
+  name: tensorflow-wk-service
+spec:
+  ports:
+    - port: 32222
+      targetPort: 32222
+  selector:
+    name: tensorflow-worker
+EOF

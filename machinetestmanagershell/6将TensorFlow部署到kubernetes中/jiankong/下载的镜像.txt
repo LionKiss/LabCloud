@@ -1,0 +1,70 @@
+下载altermanager
+docker pull quay.io/prometheus/alertmanager:v0.7.1
+docker tag quay.io/prometheus/alertmanager:v0.7.1 node0:5000/prometheus/alertmanager:v0.7.1
+docker push node0:5000/prometheus/alertmanager:v0.7.1
+
+下载grafana/grafana：4.2.0
+docker pull grafana/grafana:4.2.0
+docker tag grafana/grafana::4.2.0 node0:5000/grafana/grafana:4.2.0
+docker push node0:5000/grafana/grafana:4.2.0
+
+
+下载giantswarm/tiny-tools
+docker pull giantswarm/tiny-tools
+docker tag giantswarm/tiny-tools:latest node0:5000/giantswarm/tiny-tools
+docker push node0:5000/giantswarm/tiny-tools
+
+
+下载prom/prometheus
+docker pull prom/prometheus
+docker tag prom/prometheus:latest node0:5000/prom/prometheus
+docker push node0:5000/prom/prometheus
+
+
+下载kube-state-metrics:v0.5.0
+docker pull googlecontainer/kube-state-metrics:v0.5.0
+docker tag googlecontainer/kube-state-metrics:v0.5.0 node0:5000/googlecontainer/kube-state-metrics:v0.5.0
+docker push node0:5000/googlecontainer/kube-state-metrics:v0.5.0
+
+
+下载giantswarm/tiny-tools
+docker pull giantswarm/tiny-tools
+docker tag giantswarm/tiny-tools:latest node0:5000/giantswarm/tiny-tools
+docker push node0:5000/giantswarm/tiny-tools
+
+
+下载dockermuenster/caddy:0.9.3
+docker pull dockermuenster/caddy:0.9.3
+docker tag dockermuenster/caddy:0.9.3 node0:5000/dockermuenster/caddy:0.9.3
+docker push node0:5000/dockermuenster/caddy:0.9.3
+
+
+下载prom/node-exporter
+docker pull prom/node-exporter
+docker tag prom/node-exporter:latest node0:5000/prom/node-exporter
+docker push node0:5000/prom/node-exporter
+
+
+
+----------------------------------------
+
+下载hub.yinnut.com/node-exporter:0.12.0===prom/node-exporter
+docker pull prom/node-exporter
+docker tag prom/node-exporter:latest node2:5000/prom/node-exporter
+docker push node2:5000/prom/node-exporter
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

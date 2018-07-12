@@ -1,31 +1,31 @@
 #!/bin/bash
 set -e
  
-#²é¿´mysql·şÎñµÄ×´Ì¬£¬·½±ãµ÷ÊÔ£¬ÕâÌõÓï¾ä¿ÉÒÔÉ¾³ı
+#æŸ¥çœ‹mysqlæœåŠ¡çš„çŠ¶æ€ï¼Œæ–¹ä¾¿è°ƒè¯•ï¼Œè¿™æ¡è¯­å¥å¯ä»¥åˆ é™¤
 echo `service mysql status`
  
-echo '1.Æô¶¯mysql....'
-#Æô¶¯mysql
+echo '1.å¯åŠ¨mysql....'
+#å¯åŠ¨mysql
 service mysql start
 
 #sleep 
 echo `service mysql status`
  
-echo '2.¿ªÊ¼µ¼ÈëÊı¾İ....'
-#µ¼ÈëÊı¾İ
+echo '2.å¼€å§‹å¯¼å…¥æ•°æ®....'
+#å¯¼å…¥æ•°æ®
 mysql < /mysql/schema.sql
-echo '3.µ¼ÈëÊı¾İÍê±Ï....'
+echo '3.å¯¼å…¥æ•°æ®å®Œæ¯•....'
  
 #sleep 3
 echo `service mysql status`
  
-#ÖØĞÂÉèÖÃmysqlÃÜÂë
-echo '4.¿ªÊ¼ĞŞ¸ÄÃÜÂë....'
+#é‡æ–°è®¾ç½®mysqlå¯†ç 
+echo '4.å¼€å§‹ä¿®æ”¹å¯†ç ....'
 mysql < /mysql/privileges.sql
-echo '5.ĞŞ¸ÄÃÜÂëÍê±Ï....'
+echo '5.ä¿®æ”¹å¯†ç å®Œæ¯•....'
  
 #sleep 4
 echo `service mysql status`
-echo `mysqlÈİÆ÷Æô¶¯Íê±Ï,ÇÒÊı¾İµ¼Èë³É¹¦`
+echo `mysqlå®¹å™¨å¯åŠ¨å®Œæ¯•,ä¸”æ•°æ®å¯¼å…¥æˆåŠŸ`
  
 tail -f /dev/null

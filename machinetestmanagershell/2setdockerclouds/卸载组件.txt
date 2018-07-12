@@ -1,0 +1,211 @@
+  systemctl restart etcd
+  systemctl restart flanneld
+  systemctl restart docker 
+  systemctl restart kube-apiserver
+  systemctl restart kube-controller-manager
+  systemctl restart kube-scheduler
+  systemctl restart kube-proxy
+  systemctl restart kubelet
+  
+  systemctl restart etcd
+  systemctl restart flanneld
+  systemctl restart docker 
+  systemctl restart kube-proxy
+  systemctl restart kubelet
+  
+  
+  
+  for SERVICES in kube-apiserver kube-controller-manager kube-scheduler; do
+      systemctl start $SERVICES
+
+  done
+  
+  for SERVICES in kube-proxy kubelet ; do
+    systemctl start $SERVICES
+  done
+  
+  
+  
+  function stopMaster(){
+  for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler flanneld kube-proxy kubelet docker; do
+      systemctl status $SERVICES
+  done
+}
+function stopSlave(){
+  for SERVICES in kube-proxy kubelet flanneld docker; do
+      systemctl stop $SERVICES
+  done
+}
+
+  systemctl stop etcd
+  systemctl stop flanneld
+  systemctl stop docker 
+  systemctl stop kube-apiserver
+  systemctl stop kube-controller-manager
+  systemctl stop kube-scheduler
+  systemctl stop kube-proxy
+  systemctl stop kubelet
+  
+  rpm -qa | grep -E 'kube|docker|etcd|flannel'
+  
+  yum remove -y etcd
+  systemctl stop etcd
+  find / -name *etcd*
+  rm -rf /etc/etcd
+  rm -rf /var/lib/etcd
+  rm -rf /usr/bin/etcd
+  rm -rf `find / -name *etcd*`
+  
+  yum remove -y flannel
+  rm -rf /etc/sysconfig/flanneld.rpmsave
+  find / -name *flannel*
+  systemctl stop flanneld
+  ip link delete flannel.1
+  ip link delete flannel0
+  rm -rf /run/flannel
+  rm -rf `find / -name *flannel*`
+  
+  yum remove -y docker
+  yum remove -y docker-client
+  yum remove -y docker-common
+  rm -rf /etc/sysconfig/docker.rpmsave
+  ip link delete docker0
+  find / -name *docker*
+  rm -rf /var/lib/docker
+  rm -rf `find / -name *docker*`
+  
+  yum remove -y kubernetes-client
+  yum remove -y kubernetes-master
+  rm -rf /etc/kubernetes/config.rpmsave
+  find / -name *kubernetes*
+  rm -rf `find / -name *kubernetes*`
+  
+  systemctl restart network
+  reboot
+  
+  yum install -y flannel-0.5.5-1.fc24.x86_64.rpm
+  
+    sed -i 's/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false.*\x27/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false --registry-mirror=https:\/\/wzmto2ol.mirror.aliyuncs.com --insecure-registry node1:5000 --add-registry node1:5000\x27/' /etc/sysconfig/docker
+
+    
+    
+    
+  sed -i 's/ETCD_NAME=default/ETCD_NAME=node1/' /etc/etcd/etcd.conf
+  sed -i 's/ETCD_NAME=default/ETCD_NAME=node2/' /etc/etcd/etcd.conf
+  sed -i 's/ETCD_NAME=default/ETCD_NAME=node3/' /etc/etcd/etcd.conf
+  
+  sed -i 's/ETCD_LISTEN_CLIENT_URLS="http:\/\/.*:2379"/ETCD_LISTEN_CLIENT_URLS="http:\/\/0.0.0.0:2379"/;s/ETCD_ADVERTISE_CLIENT_URLS="http:\/\/.*:2379"/ETCD_ADVERTISE_CLIENT_URLS="http:\/\/0.0.0.0:2379"/' /etc/etcd/etcd.conf
+
+  sed -i 's/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false.*\x27/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false --registry-mirror=https:\/\/wzmto2ol.mirror.aliyuncs.com --insecure-registry node2:5000 --add-registry node2:5000\x27/' /etc/sysconfig/docker
+
+  
+  sed -i 's/KUBELET_ADDRESS="--address=.*"/KUBELET_ADDRESS="--address=0.0.0.0"/;s/KUBELET_HOSTNAME="--hostname-override=.*"/KUBELET_HOSTNAME="--hostname-override=node1"/;s/KUBELET_API_SERVER="--api-servers=http:\/\/.*:8080"/KUBELET_API_SERVER="--api-servers=http:\/\/node1:8080"/;s/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=.*"/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=node2:5000\/pod-infrastructure"/;s/KUBELET_ARGS=.*/KUBELET_ARGS="--cluster-dns=10.254.10.2 --cluster-domain=hi --allow-privileged=true"/' /etc/kubernetes/kubelet
+  sed -i 's/KUBELET_ADDRESS="--address=.*"/KUBELET_ADDRESS="--address=0.0.0.0"/;s/KUBELET_HOSTNAME="--hostname-override=.*"/KUBELET_HOSTNAME="--hostname-override=node2"/;s/KUBELET_API_SERVER="--api-servers=http:\/\/.*:8080"/KUBELET_API_SERVER="--api-servers=http:\/\/node1:8080"/;s/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=.*"/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=node2:5000\/pod-infrastructure"/;s/KUBELET_ARGS=.*/KUBELET_ARGS="--cluster-dns=10.254.10.2 --cluster-domain=hi --allow-privileged=true"/' /etc/kubernetes/kubelet
+  sed -i 's/KUBELET_ADDRESS="--address=.*"/KUBELET_ADDRESS="--address=0.0.0.0"/;s/KUBELET_HOSTNAME="--hostname-override=.*"/KUBELET_HOSTNAME="--hostname-override=node3"/;s/KUBELET_API_SERVER="--api-servers=http:\/\/.*:8080"/KUBELET_API_SERVER="--api-servers=http:\/\/node1:8080"/;s/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=.*"/KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=node2:5000\/pod-infrastructure"/;s/KUBELET_ARGS=.*/KUBELET_ARGS="--cluster-dns=10.254.10.2 --cluster-domain=hi --allow-privileged=true"/' /etc/kubernetes/kubelet
+
+  sed -i 's/FLANNEL_ETCD_ENDPOINTS="http:\/\/.*:2379"/FLANNEL_ETCD_ENDPOINTS="http:\/\/node1:2379"/;s/FLANNEL_ETCD_PREFIX=".*"/FLANNEL_ETCD_PREFIX="\/kube-centos\/network"/' /etc/sysconfig/flanneld
+
+ sed -i 's/KUBE_MASTER="--master=http:\/\/.*:8080"/KUBE_MASTER="--master=http:\/\/node1:8080"/' /etc/kubernetes/config
+ 
+ 
+function startMasterSoftware(){
+  for SERVICES in etcd flanneld docker kube-apiserver kube-controller-manager kube-scheduler ; do
+      systemctl restart $SERVICES
+      systemctl enable $SERVICES
+      systemctl status $SERVICES
+  done
+}
+function startSlaveSoftware(){
+  for SERVICES in flanneld docker kube-proxy kubelet ; do
+    systemctl restart $SERVICES
+    systemctl enable $SERVICES
+    systemctl status $SERVICES
+  done
+}
+function startMaster(){
+  startMasterSoftware
+  startSlaveSoftware
+}
+function startSlave(){
+  startSlaveSoftware
+}
+
+
+
+function closeFireWall(){
+  setenforce 0
+  /usr/sbin/sestatus -v
+  getenforce
+
+  iptables -F 
+
+  for SERVICES in iptables-services firewalld; do
+    systemctl stop $SERVICES
+    systemctl disable $SERVICES
+  done  
+}
+function startMasterSoftware(){
+  for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler flanneld; do
+      systemctl restart $SERVICES
+      systemctl enable $SERVICES
+      systemctl status $SERVICES
+  done
+}
+function startSlaveSoftware(){
+  for SERVICES in kube-proxy kubelet flanneld docker; do
+    systemctl restart $SERVICES
+    systemctl enable $SERVICES
+    systemctl status $SERVICES
+  done
+}
+function startMaster(){
+  closeFireWall
+  startMasterSoftware
+  startSlaveSoftware
+}
+function startSlave(){
+  closeFireWall
+  startSlaveSoftware
+}
+
+
+wget https://github.com/coreos/etcd/releases/download/v2.3.2/etcd-v2.3.2-linux-amd64.tar.gz
+wget https://github.com/coreos/flannel/releases/download/v0.5.5/flannel-0.5.5-linux-amd64.tar.gz
+scp flannel-0.5.5-linux-amd64.tar.gz root@node2:/root/
+
+[Unit]
+Description=etcd
+[Service]
+Environment=ETCD_NAME=kubernetes
+Environment=ETCD_DATA_DIR=/var/lib/etcd
+Environment=ETCD_LISTEN_CLIENT_URLS=http://172.16.2.19:4001,http://localhost:4001
+Environment=ETCD_LISTEN_PEER_URLS=http://172.16.2.19:7001,http://localhost:7001
+Environment=ETCD_INITIAL_ADVERTISE_PEER_URLS=http://172.16.2.19:7001,http://localhost:7001
+Environment=ETCD_ADVERTISE_CLIENT_URLS=http://172.16.2.19:4001,http://localhost:4001
+Environment=ETCD_INITIAL_CLUSTER_STATE=new
+Environment=ETCD_INITIAL_CLUSTER_TOKEN=Kubernetes
+Environment=ETCD_INITIAL_CLUSTER=kubernetes=http://172.16.2.19:7001,kubernetes=http://localhost:7001
+ExecStart=/usr/bin/etcd
+[Install]
+WantedBy=multi-user.target
+
+
+tar xvf flannel-0.5.5-linux-amd64.tar.gz
+mv flannel-0.5.5 /opt/flannel
+
+vi /usr/lib/systemd/system/flanneld.service 
+[Unit]
+Description=flannel
+[Service]
+ExecStart=/opt/flannel/flanneld \
+-etcd-endpoints=http://172.16.2.19:4001
+[Install]
+WantedBy=multi-user.target
+yum install docker -y 
+  sed -i 's/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false.*\x27/OPTIONS=\x27--selinux-enabled --log-driver=journald --signature-verification=false --registry-mirror=https:\/\/wzmto2ol.mirror.aliyuncs.com --insecure-registry node2:5000 --add-registry node2:5000\x27/' /etc/sysconfig/docker
+
+  systemctl stop docker
+  
+  systemctl stop docker
+ifconfig  docker0 down
+systemctl start docker

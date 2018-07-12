@@ -1,0 +1,102 @@
+1，文件下载
+在https://prometheus.io/download/网址中下载 Prometheus、node-exeproter
+在https://grafana.com/grafana/download?platform=linux中下载grafana，这里下载Standalone Linux Binaries(64 Bit)
+wget https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.0.0.linux-x64.tar.gz
+tar -zxvf grafana-5.0.0.linux-x64.tar.gz
+
+2， 每个机器上
+2.1
+安装Go编译环境
+#安装go语言golang
+yum install -y golang
+mkdir /root/Goworkspace
+echo 'export GOPATH="/root/Goworkspace"' >> ~/.bashrc
+source ~/.bashrc
+#检查go版本
+go version
+2.2
+为grafana安装字体
+yum install -y fontconfig
+yum install -y freetype*
+yum install -y urw-fonts
+
+3编辑Prometheus.yaml文件
+cat > prometheus.yml <<EOF
+global:
+  scrape_interval: 20s
+  scrape_timeout: 10s
+  evaluation_interval: 20s
+
+scrape_configs:
+- job_name: 'kubernetes-nodes-cadvisor'
+  kubernetes_sd_configs:
+  - api_server: 'http://172.16.2.179:8080'
+    role: node
+  relabel_configs:
+  - action: labelmap
+    regex: __meta_kubernetes_node_label_(.+)
+  - source_labels: [__meta_kubernetes_role]
+    action: replace
+    target_label: kubernetes_role
+    #将默认10250端口改成10255端口
+  - source_labels: [__address__]
+    regex: '(.*):10250'
+    replacement: '${1}:10255'
+    target_label: __address__
+#以下是监控每个宿主机，需要安装node-exporter    
+- job_name: 'kubernetes_node'
+  kubernetes_sd_configs:
+  - role: node
+    api_server: 'http://172.16.2.179:8080'
+  relabel_configs:
+  - source_labels: [__address__]
+    regex: '(.*):10250'
+    replacement: '${1}:9100'
+    target_label: __address__
+EOF
+
+编辑node-exeproter文件
+cat > node-exeproter EOF
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    prometheus.io/scrape: 'true'
+  labels:
+    app: node-exporter
+    name: node-exporter
+  name: node-exporter
+spec:
+  clusterIP: None
+  ports:
+  - name: scrape
+    port: 9100
+    protocol: TCP
+  selector:
+    app: node-exporter
+  type: ClusterIP
+
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+spec:
+  template:
+    metadata:
+      labels:
+        app: node-exporter
+      name: node-exporter
+    spec:
+      containers:
+      - image: prom/node-exporter
+        name: node-exporter
+        ports:
+        - containerPort: 9100
+          hostPort: 9100
+          name: scrape
+      hostNetwork: true
+      hostPID: true
+EOF
+
+
+

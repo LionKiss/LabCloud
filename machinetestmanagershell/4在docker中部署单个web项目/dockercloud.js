@@ -6,17 +6,17 @@ function caculate(formulation){
 
 
 var cloud = (function (){
-  //²¿Êğ½ÚµãµÄIPµØÖ·
+  //éƒ¨ç½²èŠ‚ç‚¹çš„IPåœ°å€
   var bushu_IP="172.16.2.1";
   var bushu_pwd="hadoop"
   
-  //ÎÄ¼şÃû ¡°½«´ËÎÄ¼şÉÏ´«µ½½Úµã¡±ÏÂµÄÎÄ¼şÂ·¾¶
+  //æ–‡ä»¶å â€œå°†æ­¤æ–‡ä»¶ä¸Šä¼ åˆ°èŠ‚ç‚¹â€ä¸‹çš„æ–‡ä»¶è·¯å¾„
   var files_Dir="/root/mysqltomcat"
   
-  //°²×°hadoop
+  //å®‰è£…hadoop
   function install_mysql_tomcat(){
 	WScript.Echo("install_mysql_tomcat");
-	//ÎÄ¼şÌæ»»
+	//æ–‡ä»¶æ›¿æ¢
 	var ForReading = 1, ForWriting = 2;
 	var fso = new ActiveXObject("Scripting.FileSystemObject");
 	var template = fso.OpenTextFile("mysql_tomcat.sh", ForReading);
@@ -25,13 +25,13 @@ var cloud = (function (){
 	tmp.Write(contentTemplate.replace(/files_Dir=/,"files_Dir="+files_Dir+"\n"));
 	template.Close();
 	tmp     .Close();
-	//½«Ìæ»»µÄÎÄ¼şÍ¨¹ıputty½øĞĞÔ¶³ÌÖ´ĞĞ
+	//å°†æ›¿æ¢çš„æ–‡ä»¶é€šè¿‡puttyè¿›è¡Œè¿œç¨‹æ‰§è¡Œ
 	var shell = WScript.CreateObject("WScript.Shell");
-	//Ä¬ÈÏrootÓÃ»§È¨ÏŞÖ±½ÓÆô¶¯
+	//é»˜è®¤rootç”¨æˆ·æƒé™ç›´æ¥å¯åŠ¨
 	shell.run("putty -m mysql_tomcat.tmp.sh -pw " +bushu_pwd+ " root@" +bushu_IP, 1, true); 
   }
   
-  //º¯Êı¶ÔÓ¦
+  //å‡½æ•°å¯¹åº”
   return {
 	  install_mysql_tomcat:install_mysql_tomcat,
 	  abc:null
@@ -40,7 +40,7 @@ var cloud = (function (){
 /*main*/
 (function main(){
 	
-	/*ÉèÖÃÄ¬ÈÏÖ´ĞĞÒıÇæ
+	/*è®¾ç½®é»˜è®¤æ‰§è¡Œå¼•æ“
 	
 	cscript //h:cscript
 	
